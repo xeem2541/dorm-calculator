@@ -370,19 +370,6 @@
                                 <p class="text-xl font-bold text-slate-800"><span id="outGrandTotal">0.00</span> ฿</p>
                             </div>
                             
-                            <!-- Signature block -->
-                            <div id="signatureBlock" class="mt-16 text-sm flex justify-between text-slate-800">
-                                <div class="text-center">
-                                    <p>__________________________</p>
-                                    <p class="mt-2 font-medium">ผู้ชำระเงิน (Payer)</p>
-                                    <p class="mt-1 text-xs text-slate-500">วันที่ ______/______/______</p>
-                                </div>
-                                <div class="text-center">
-                                    <p>__________________________</p>
-                                    <p class="mt-2 font-medium">ผู้รับเงิน (Receiver)</p>
-                                    <p class="mt-1 text-xs text-slate-500">วันที่ ______/______/______</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -411,15 +398,7 @@
         // Initialize App
         window.onload = () => {
             loadState();
-            
-            // Dummy data if empty
-            if(state.rooms.length === 0) {
-                state.rooms = [
-                    { id: '101', rent: 2000, elecMeter: 1250, waterMeter: 340 },
-                    { id: '102', rent: 2500, elecMeter: 980, waterMeter: 125 },
-                ];
-                saveState();
-            }
+
 
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('outDate').textContent = new Date().toLocaleDateString('th-TH', options);
