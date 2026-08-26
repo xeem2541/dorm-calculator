@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมคำนวณค่าเช่าหอพัก</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #f1f5f9;
+        }
+        /* Remove arrows from number input */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        @media print {
+            body {
+                background-color: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-area {
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-4 md:p-8 font-sans">
+    
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8 no-print">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">ระบบคำนวณค่าเช่าหอพัก</h1>
+            <p class="text-slate-500 mt-2">คำนวณบิลค่าเช่า ค่าน้ำ ค่าไฟ ได้อย่างสะดวกและแม่นยำ</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Column: Input Form (Hidden when printing) -->
+            <div class="w-full lg:w-3/5 space-y-6 no-print">
+                
+                <!-- Room Info Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-slate-700">
+                        <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        ข้อมูลห้องพัก
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">หมายเลขห้อง</label>
+                            <input type="text" id="roomNo" placeholder="เช่น 241" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" oninput="calculate()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">ค่าเช่ารายเดือน (บาท)</label>
+                            <input type="number" id="roomRent" placeholder="เช่น 1800" value="1800" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all" oninput="calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Electricity Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold flex items-center gap-2 text-slate-700">
+                            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            ค่าไฟฟ้า
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-slate-500">หน่วยละ (บาท):</label>
+                            <input type="number" id="elecRate" value="9" class="w-20 px-3 py-1.5 text-center bg-amber-50 border border-amber-200 rounded-lg text-amber-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all" oninput="calculate()">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">เลขมิเตอร์เก่า</label>
+                            <input type="number" id="elecOld" placeholder="เช่น 7588" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none transition-all" oninput="calculate()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">เลขมิเตอร์ใหม่</label>
+                            <input type="number" id="elecNew" placeholder="เช่น 7643" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none transition-all" oninput="calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Water Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold flex items-center gap-2 text-slate-700">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.34A5.84 5.84 0 0 1 2 12.28 6 6 0 0 1 8 6a6 6 0 0 1 6 6.28 5.84 5.84 0 0 1 0 2.38 6 6 0 0 0 6 0z"></path></svg>
+                            ค่าน้ำประปา
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm text-slate-500">หน่วยละ (บาท):</label>
+                            <input type="number" id="waterRate" value="10" class="w-20 px-3 py-1.5 text-center bg-blue-50 border border-blue-200 rounded-lg text-blue-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" oninput="calculate()">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">เลขมิเตอร์เก่า</label>
+                            <input type="number" id="waterOld" placeholder="เช่น 656" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" oninput="calculate()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">เลขมิเตอร์ใหม่</label>
+                            <input type="number" id="waterNew" placeholder="เช่น 661" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" oninput="calculate()">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Bill Summary (Print Area) -->
+            <div class="w-full lg:w-2/5">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden sticky top-8 border border-slate-200 print-area">
+                    <!-- Bill Header -->
+                    <div class="bg-slate-800 px-6 py-6 text-white text-center">
+                        <h3 class="text-2xl font-bold tracking-widest uppercase mb-1">INVOICE</h3>
+                        <p class="text-slate-400 text-sm font-light">ใบแจ้งหนี้ / ใบเสร็จรับเงิน</p>
+                    </div>
+                    
+                    <div class="p-8">
+                        <div class="flex justify-between items-end mb-8 pb-4 border-b border-slate-100">
+                            <div>
+                                <p class="text-sm text-slate-500 mb-1">หมายเลขห้อง</p>
+                                <p class="text-4xl font-bold text-primary-600" id="outRoomNo">-</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-slate-500 mb-1">วันที่ออกบิล</p>
+                                <p class="text-sm font-medium text-slate-700" id="outDate"></p>
+                            </div>
+                        </div>
+
+                        <!-- Bill Items -->
+                        <div class="space-y-5 mb-8">
+                            <!-- Rent -->
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-semibold text-slate-700">ค่าเช่าห้องพัก</p>
+                                    <p class="text-sm text-slate-400">ประจำเดือน</p>
+                                </div>
+                                <p class="font-medium text-slate-800 text-lg" id="outRent">0.00 ฿</p>
+                            </div>
+                            
+                            <!-- Electricity -->
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-semibold text-slate-700">ค่าไฟ</p>
+                                    <p class="text-sm text-slate-500 mt-1">
+                                        จำนวน <span id="outElecUnits" class="font-medium text-amber-600">0</span> หน่วย 
+                                        (@ <span id="outElecRate">9</span> บาท)
+                                    </p>
+                                </div>
+                                <p class="font-medium text-slate-800 text-lg" id="outElecTotal">0.00 ฿</p>
+                            </div>
+
+                            <!-- Water -->
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-semibold text-slate-700">ค่าน้ำประปา</p>
+                                    <p class="text-sm text-slate-500 mt-1">
+                                        จำนวน <span id="outWaterUnits" class="font-medium text-blue-600">0</span> หน่วย 
+                                        (@ <span id="outWaterRate">10</span> บาท)
+                                    </p>
+                                </div>
+                                <p class="font-medium text-slate-800 text-lg" id="outWaterTotal">0.00 ฿</p>
+                            </div>
+                        </div>
+
+                        <!-- Total -->
+                        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+                            <div class="flex justify-between items-center">
+                                <p class="text-lg font-bold text-slate-700">ยอดชำระสุทธิ</p>
+                                <p class="text-3xl font-bold text-primary-600" id="outGrandTotal">0.00 ฿</p>
+                            </div>
+                        </div>
+                        
+                        <button onclick="window.print()" class="no-print w-full mt-6 bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            พิมพ์ใบแจ้งหนี้
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date on load
+        window.onload = () => {
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('outDate').textContent = today.toLocaleDateString('th-TH', options);
+            calculate();
+        };
+
+        function calculate() {
+            // Get Room Inputs
+            const roomNo = document.getElementById('roomNo').value || '-';
+            const roomRent = parseFloat(document.getElementById('roomRent').value) || 0;
+            
+            // Get Rates
+            const elecRate = parseFloat(document.getElementById('elecRate').value) || 0;
+            const waterRate = parseFloat(document.getElementById('waterRate').value) || 0;
+            
+            // Calculate Electricity
+            const elecOld = parseFloat(document.getElementById('elecOld').value) || 0;
+            const elecNew = parseFloat(document.getElementById('elecNew').value) || 0;
+            let elecUnits = elecNew - elecOld;
+            
+            // Prevent negative units if old > new (user typo), but allow 0 if both are empty
+            if (elecUnits < 0 || (document.getElementById('elecOld').value === '' && document.getElementById('elecNew').value === '')) {
+                elecUnits = 0; 
+            }
+            const elecTotal = elecUnits * elecRate;
+
+            // Calculate Water
+            const waterOld = parseFloat(document.getElementById('waterOld').value) || 0;
+            const waterNew = parseFloat(document.getElementById('waterNew').value) || 0;
+            let waterUnits = waterNew - waterOld;
+            
+            if (waterUnits < 0 || (document.getElementById('waterOld').value === '' && document.getElementById('waterNew').value === '')) {
+                waterUnits = 0; 
+            }
+            const waterTotal = waterUnits * waterRate;
+
+            // Grand Total
+            const grandTotal = roomRent + elecTotal + waterTotal;
+
+            // Display Output
+            document.getElementById('outRoomNo').textContent = roomNo;
+            document.getElementById('outRent').textContent = formatCurrency(roomRent);
+            
+            document.getElementById('outElecUnits').textContent = formatNumber(elecUnits);
+            document.getElementById('outElecRate').textContent = formatNumber(elecRate);
+            document.getElementById('outElecTotal').textContent = formatCurrency(elecTotal);
+            
+            document.getElementById('outWaterUnits').textContent = formatNumber(waterUnits);
+            document.getElementById('outWaterRate').textContent = formatNumber(waterRate);
+            document.getElementById('outWaterTotal').textContent = formatCurrency(waterTotal);
+
+            document.getElementById('outGrandTotal').textContent = formatCurrency(grandTotal);
+        }
+
+        function formatCurrency(amount) {
+            return amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ฿';
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('th-TH', { maximumFractionDigits: 2 });
+        }
+    </script>
+</body>
+</html>
