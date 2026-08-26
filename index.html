@@ -195,8 +195,9 @@
                         <input type="number" id="fWaterMeter" placeholder="0" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                     </div>
                 </div>
-                <div class="pt-2">
+                <div class="pt-2 space-y-2">
                     <button onclick="saveRoom()" class="w-full bg-primary-600 text-white px-4 py-2.5 rounded font-medium shadow-sm hover:bg-primary-700 transition-colors">บันทึกข้อมูลห้อง</button>
+                    <button id="btnDeleteRoomForm" onclick="deleteRoom()" class="w-full bg-red-50 text-red-600 border border-red-200 px-4 py-2.5 rounded font-medium hover:bg-red-100 transition-colors" style="display:none;">ลบข้อมูลห้องนี้</button>
                 </div>
             </div>
         </div>
@@ -208,7 +209,6 @@
                     <button onclick="goHome()" class="text-slate-500 hover:text-slate-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
                     <h2 class="text-xl font-semibold text-slate-800">ใบแจ้งหนี้ - ห้อง <span id="billRoomTitle" class="text-primary-700"></span></h2>
                 </div>
-                <button id="btnDeleteRoom" onclick="deleteRoom()" class="text-red-600 text-sm hover:underline font-medium admin-only">ลบข้อมูลห้องนี้</button>
             </div>
 
             <div class="flex flex-col lg:flex-row gap-6">
@@ -511,6 +511,7 @@
                 document.getElementById('fRent').value = '';
                 document.getElementById('fElecMeter').value = '';
                 document.getElementById('fWaterMeter').value = '';
+                document.getElementById('btnDeleteRoomForm').style.display = 'none';
             }
         }
 
@@ -592,18 +593,20 @@
             e.stopPropagation();
             const room = state.rooms.find(r => r.id === roomId);
             if(room) {
+                nav('room-form');
                 document.getElementById('roomFormTitle').innerText = `แก้ไขข้อมูลห้อง ${room.id}`;
                 document.getElementById('editRoomId').value = room.id;
                 document.getElementById('fRoomId').value = room.id;
                 document.getElementById('fRent').value = room.rent;
                 document.getElementById('fElecMeter').value = room.elecMeter;
                 document.getElementById('fWaterMeter').value = room.waterMeter;
-                nav('room-form');
+                document.getElementById('btnDeleteRoomForm').style.display = 'block';
             }
         }
 
         function deleteRoom() {
-            const roomId = document.getElementById('bRoomId').value;
+            const roomId = document.getElementById('editRoomId').value;
+            if(!roomId) return;
             if(confirm(`ยืนยันการลบข้อมูลห้อง ${roomId} ออกจากระบบ?`)) {
                 state.rooms = state.rooms.filter(r => r.id !== roomId);
                 saveState();
@@ -624,7 +627,6 @@
                 document.getElementById('invoiceContainerDiv').className = "w-full lg:w-2/5 print-container";
                 document.getElementById('saveBillBtn').style.display = 'flex';
                 document.getElementById('saveBillHint').style.display = 'block';
-                document.getElementById('btnDeleteRoom').style.display = 'block';
             } else {
                 // Member view: Hide input area, stretch invoice to full width
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
@@ -672,7 +674,6 @@
             
             document.getElementById('saveBillBtn').style.display = 'none';
             document.getElementById('saveBillHint').style.display = 'none';
-            document.getElementById('btnDeleteRoom').style.display = 'none';
             
             document.getElementById('billRoomTitle').innerText = 'ด่วน (Quick)';
             document.getElementById('bRoomId').value = 'QUICK';
