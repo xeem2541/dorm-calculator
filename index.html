@@ -109,6 +109,13 @@
                     <p class="text-xs text-slate-400 mt-4 text-center">*ใช้ระบบจำลอง (Mock System) ข้อมูลดึงจาก LocalStorage บนเครื่องนี้เท่านั้น</p>
                 </div>
             </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="openQuickCalc()" class="text-slate-500 hover:text-primary-600 text-sm font-medium underline flex items-center justify-center gap-1 mx-auto transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    คำนวณด่วน (Quick Calculator)
+                </button>
+            </div>
         </div>
 
         <!-- DASHBOARD VIEW (Admin) -->
@@ -273,11 +280,11 @@
                     </section>
 
                     <div class="pt-2">
-                        <button onclick="saveAndIssueBill()" class="w-full bg-slate-800 text-white px-4 py-3 rounded text-sm font-semibold hover:bg-slate-700 shadow-sm transition-colors flex items-center justify-center gap-2">
+                        <button id="saveBillBtn" onclick="saveAndIssueBill()" class="w-full bg-slate-800 text-white px-4 py-3 rounded text-sm font-semibold hover:bg-slate-700 shadow-sm transition-colors flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                             บันทึกข้อมูลและอัปเดตมิเตอร์
                         </button>
-                        <p class="text-xs text-center text-slate-500 mt-2">ข้อมูลมิเตอร์ใหม่จะถูกนำไปใช้เป็นมิเตอร์เดิมในรอบบิลถัดไป</p>
+                        <p id="saveBillHint" class="text-xs text-center text-slate-500 mt-2">ข้อมูลมิเตอร์ใหม่จะถูกนำไปใช้เป็นมิเตอร์เดิมในรอบบิลถัดไป</p>
                     </div>
                 </div>
 
@@ -492,7 +499,8 @@
 
         function goHome() {
             if(session.role === 'admin') nav('dashboard');
-            if(session.role === 'member') openBilling(session.roomId);
+            else if(session.role === 'member') openBilling(session.roomId);
+            else nav('login');
         }
 
         // State Management
@@ -635,6 +643,9 @@
             if(session.role === 'admin') {
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
                 document.getElementById('invoiceContainerDiv').className = "w-full lg:w-2/5 print-container";
+                document.getElementById('saveBillBtn').style.display = 'flex';
+                document.getElementById('saveBillHint').style.display = 'block';
+                document.getElementById('btnDeleteRoom').style.display = 'block';
             } else {
                 // Member view: Hide input area, stretch invoice to full width
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
@@ -654,6 +665,47 @@
             document.getElementById('bWaterNew').value = '';
 
             // Dorm Name
+            const dName = document.getElementById('outDormName');
+            const dAddr = document.getElementById('outDormAddress');
+            if (state.settings.dormName) {
+                dName.textContent = state.settings.dormName;
+                dName.style.display = 'block';
+            } else {
+                dName.style.display = 'none';
+            }
+            if (state.settings.dormAddress) {
+                dAddr.textContent = state.settings.dormAddress;
+                dAddr.style.display = 'block';
+            } else {
+                dAddr.style.display = 'none';
+            }
+
+            currentExtras = [];
+            renderExtraInputs();
+            calcBill();
+        }
+
+        function openQuickCalc() {
+            nav('billing');
+            
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+            document.getElementById('invoiceContainerDiv').className = "w-full lg:w-2/5 print-container";
+            
+            document.getElementById('saveBillBtn').style.display = 'none';
+            document.getElementById('saveBillHint').style.display = 'none';
+            document.getElementById('btnDeleteRoom').style.display = 'none';
+            
+            document.getElementById('billRoomTitle').innerText = 'ด่วน (Quick)';
+            document.getElementById('bRoomId').value = 'QUICK';
+            
+            document.getElementById('bRent').value = '';
+            document.getElementById('bElecRate').value = state.settings.elecRate || 9;
+            document.getElementById('bWaterRate').value = state.settings.waterRate || 10;
+            document.getElementById('bElecOld').value = '';
+            document.getElementById('bWaterOld').value = '';
+            document.getElementById('bElecNew').value = '';
+            document.getElementById('bWaterNew').value = '';
+
             const dName = document.getElementById('outDormName');
             const dAddr = document.getElementById('outDormAddress');
             if (state.settings.dormName) {
@@ -748,7 +800,7 @@
             const grandTotal = roomRent + elecTotal + waterTotal + extrasTotal;
 
             // Update Invoice UI
-            document.getElementById('outRoomNo').textContent = roomNo;
+            document.getElementById('outRoomNo').textContent = roomNo === 'QUICK' ? '-' : roomNo;
             document.getElementById('outRent').textContent = formatN(roomRent);
             
             document.getElementById('oElecOld').textContent = elecOld;
