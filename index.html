@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบคำนวณบิลหอพัก</title>
+    <title>ระบบจัดการหอพัก (Dorm Manager)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -25,16 +27,12 @@
             background-color: #f8fafc; 
             -webkit-tap-highlight-color: transparent; 
         }
-        /* Hide number arrows */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+            -webkit-appearance: none; margin: 0; 
         }
-        /* Smooth scrolling */
         html { scroll-behavior: smooth; }
         
-        /* Receipt zig-zag edge */
         .receipt-edge {
             background: linear-gradient(-45deg, transparent 12px, white 0), linear-gradient(45deg, transparent 12px, white 0);
             background-repeat: repeat-x;
@@ -43,7 +41,9 @@
             padding-bottom: 24px;
         }
 
-        /* Print styles */
+        .view { display: none; }
+        .view.active { display: block; }
+
         @media print {
             body { background: white; padding: 0 !important; }
             .no-print { display: none !important; }
@@ -52,291 +52,537 @@
             .shadow-xl, .shadow-sm { box-shadow: none !important; }
             .print-container { max-width: 100% !important; border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
             .border-slate-100 { border-color: #e2e8f0 !important; }
+            .invoice-wrap { position: absolute; left: 0; top: 0; }
         }
     </style>
 </head>
 <body class="text-slate-800 pb-24 lg:pb-8">
-    
-    <!-- Mobile & Desktop Header -->
+
+    <!-- Navbar -->
     <header class="bg-primary-600 text-white sticky top-0 z-40 shadow-md no-print">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-center relative">
-            <svg class="w-6 h-6 absolute left-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-            <h1 class="text-lg font-semibold tracking-wide">ระบบจัดการบิลหอพัก</h1>
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2" onclick="nav('dashboard')" style="cursor:pointer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                <h1 class="text-lg font-semibold tracking-wide">DormManager</h1>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="nav('settings')" class="text-white/80 hover:text-white" title="ตั้งค่าเริ่มต้น">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+            </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-4 mt-6 lg:mt-8">
-        <div class="flex flex-col lg:flex-row gap-6">
-            
-            <!-- Left: Input Forms -->
-            <div class="w-full lg:w-3/5 space-y-5 no-print">
-                <!-- Room Card -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
-                    <h2 class="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                        <div class="bg-primary-100 text-primary-600 p-1.5 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                        </div>
-                        ข้อมูลห้อง
-                    </h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">หมายเลขห้อง</label>
-                            <input type="text" id="roomNo" placeholder="เช่น 101" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">ค่าเช่า (บาท)</label>
-                            <input type="number" id="roomRent" placeholder="1800" value="1800" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Electric Card -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-semibold text-slate-700 flex items-center gap-2">
-                            <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            </div>
-                            ค่าไฟฟ้า
-                        </h2>
-                        <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                            <label class="text-xs text-slate-500">หน่วยละ</label>
-                            <input type="number" id="elecRate" value="9" class="w-10 text-center bg-transparent text-amber-600 font-bold focus:outline-none" oninput="calc()">
-                            <span class="text-xs text-slate-500">บ.</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์เก่า</label>
-                            <input type="number" id="elecOld" placeholder="จดครั้งก่อน" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์ใหม่</label>
-                            <input type="number" id="elecNew" placeholder="จดครั้งนี้" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Water Card -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-semibold text-slate-700 flex items-center gap-2">
-                            <div class="bg-cyan-100 text-cyan-600 p-1.5 rounded-lg">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.34A5.84 5.84 0 0 1 2 12.28 6 6 0 0 1 8 6a6 6 0 0 1 6 6.28 5.84 5.84 0 0 1 0 2.38 6 6 0 0 0 6 0z"></path></svg>
-                            </div>
-                            ค่าน้ำประปา
-                        </h2>
-                        <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                            <label class="text-xs text-slate-500">หน่วยละ</label>
-                            <input type="number" id="waterRate" value="10" class="w-10 text-center bg-transparent text-cyan-600 font-bold focus:outline-none" oninput="calc()">
-                            <span class="text-xs text-slate-500">บ.</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์เก่า</label>
-                            <input type="number" id="waterOld" placeholder="จดครั้งก่อน" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์ใหม่</label>
-                            <input type="number" id="waterNew" placeholder="จดครั้งนี้" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- Extra fee Card (From the image e.g., ค่าขยะ) -->
-                <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md">
-                    <h2 class="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                        <div class="bg-purple-100 text-purple-600 p-1.5 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        </div>
-                        ค่าบริการอื่นๆ
-                    </h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">ชื่อรายการ</label>
-                            <input type="text" id="extraName" placeholder="เช่น ค่าขยะ" value="ค่าขยะ" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1.5">จำนวนเงิน (บาท)</label>
-                            <input type="number" id="extraFee" placeholder="50" value="50" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500 outline-none transition-all text-sm font-medium" oninput="calc()">
-                        </div>
-                    </div>
-                </section>
+        
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" class="view active no-print">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800">จัดการห้องพัก</h2>
+                <button onclick="nav('room-form')" class="bg-primary-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary-700 shadow-sm">+ เพิ่มห้อง</button>
             </div>
 
-            <!-- Right: Invoice Area -->
-            <div class="w-full lg:w-2/5 print-container" id="invoiceArea">
-                <div class="bg-white shadow-xl overflow-hidden lg:sticky lg:top-24 receipt-edge border border-slate-100 lg:border-none rounded-t-2xl lg:rounded-2xl mt-4 lg:mt-0">
-                    
-                    <!-- Print Only Header -->
-                    <div class="hidden print-only text-center pt-8 pb-4">
-                        <h1 class="text-2xl font-bold text-slate-800">ใบแจ้งหนี้ / ใบเสร็จรับเงิน</h1>
-                        <p class="text-slate-500">ใบแจ้งหนี้ค่าเช่าห้องพัก</p>
-                    </div>
+            <div id="roomList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
 
-                    <!-- App UI Header -->
-                    <div class="bg-slate-800 px-6 py-5 text-white flex justify-between items-center no-print">
-                        <div>
-                            <h3 class="text-lg font-bold tracking-widest uppercase">INVOICE</h3>
-                            <p class="text-slate-400 text-xs">บิลสรุปยอด</p>
+        <!-- SETTINGS VIEW -->
+        <div id="view-settings" class="view no-print max-w-xl mx-auto">
+            <div class="flex items-center gap-3 mb-6">
+                <button onclick="nav('dashboard')" class="p-2 bg-white rounded-full shadow-sm hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <h2 class="text-xl font-bold text-slate-800">ตั้งค่าเริ่มต้น (ส่วนกลาง)</h2>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-5">
+                <p class="text-sm text-slate-500 mb-2">ค่าเหล่านี้จะถูกใช้เป็นค่าเริ่มต้นเมื่อทำบิลให้ทุกห้อง</p>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ค่าไฟ (บาท/หน่วย)</label>
+                    <input type="number" id="gElecRate" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ค่าน้ำ (บาท/หน่วย)</label>
+                    <input type="number" id="gWaterRate" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อค่าบริการอื่นๆ (ค่าเริ่มต้น)</label>
+                    <input type="text" id="gExtraName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงินค่าบริการอื่นๆ (บาท)</label>
+                    <input type="number" id="gExtraFee" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+                <button onclick="saveSettings()" class="w-full bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-primary-700 mt-4 shadow-sm">บันทึกการตั้งค่า</button>
+            </div>
+        </div>
+
+        <!-- ROOM FORM VIEW (Add/Edit) -->
+        <div id="view-room-form" class="view no-print max-w-xl mx-auto">
+             <div class="flex items-center gap-3 mb-6">
+                <button onclick="nav('dashboard')" class="p-2 bg-white rounded-full shadow-sm hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <h2 class="text-xl font-bold text-slate-800" id="roomFormTitle">เพิ่มห้องใหม่</h2>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-5">
+                <input type="hidden" id="editRoomId">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">หมายเลขห้อง</label>
+                    <input type="text" id="fRoomId" placeholder="เช่น 101" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ค่าเช่ารายเดือน (บาท)</label>
+                    <input type="number" id="fRent" placeholder="3500" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">เลขมิเตอร์ไฟ (ล่าสุด)</label>
+                        <input type="number" id="fElecMeter" placeholder="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">เลขมิเตอร์น้ำ (ล่าสุด)</label>
+                        <input type="number" id="fWaterMeter" placeholder="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    </div>
+                </div>
+                <button onclick="saveRoom()" class="w-full bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold mt-4 shadow-sm hover:bg-primary-700">บันทึกข้อมูลห้อง</button>
+            </div>
+        </div>
+
+        <!-- BILLING VIEW -->
+        <div id="view-billing" class="view">
+            <div class="flex items-center justify-between mb-6 no-print">
+                <div class="flex items-center gap-3">
+                    <button onclick="nav('dashboard')" class="p-2 bg-white rounded-full shadow-sm hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                    <h2 class="text-xl font-bold text-slate-800">ออกบิลห้อง <span id="billRoomTitle" class="text-primary-600"></span></h2>
+                </div>
+                <button onclick="deleteRoom()" class="text-red-500 text-sm hover:underline">ลบห้องนี้</button>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left: Input -->
+                <div class="w-full lg:w-3/5 space-y-5 no-print" id="billingInputsArea">
+                    <input type="hidden" id="bRoomId">
+                    
+                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1.5">ค่าเช่า (บาท)</label>
+                                <input type="number" id="bRent" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                            </div>
                         </div>
-                        <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-lg transition-colors backdrop-blur-sm flex items-center gap-2 text-sm font-medium">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                            พิมพ์
+                    </section>
+
+                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-base font-semibold text-slate-700 flex items-center gap-2">
+                                <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </div>
+                                ค่าไฟฟ้า
+                            </h2>
+                            <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                                <label class="text-xs text-slate-500">หน่วยละ</label>
+                                <input type="number" id="bElecRate" class="w-10 text-center bg-transparent text-amber-600 font-bold outline-none" oninput="calcBill()">
+                                <span class="text-xs text-slate-500">บ.</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์เก่า (ดึงมาอัตโนมัติ)</label>
+                                <input type="number" id="bElecOld" class="w-full px-4 py-3 bg-slate-100 text-slate-500 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1.5 text-primary-600 font-bold">จดมิเตอร์ใหม่</label>
+                                <input type="number" id="bElecNew" class="w-full px-4 py-3 bg-amber-50 border border-amber-300 rounded-xl outline-none text-amber-800 font-semibold" oninput="calcBill()">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-base font-semibold text-slate-700 flex items-center gap-2">
+                                <div class="bg-cyan-100 text-cyan-600 p-1.5 rounded-lg">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.34A5.84 5.84 0 0 1 2 12.28 6 6 0 0 1 8 6a6 6 0 0 1 6 6.28 5.84 5.84 0 0 1 0 2.38 6 6 0 0 0 6 0z"></path></svg>
+                                </div>
+                                ค่าน้ำประปา
+                            </h2>
+                            <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                                <label class="text-xs text-slate-500">หน่วยละ</label>
+                                <input type="number" id="bWaterRate" class="w-10 text-center bg-transparent text-cyan-600 font-bold outline-none" oninput="calcBill()">
+                                <span class="text-xs text-slate-500">บ.</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์เก่า</label>
+                                <input type="number" id="bWaterOld" class="w-full px-4 py-3 bg-slate-100 text-slate-500 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1.5 text-primary-600 font-bold">จดมิเตอร์ใหม่</label>
+                                <input type="number" id="bWaterNew" class="w-full px-4 py-3 bg-cyan-50 border border-cyan-300 rounded-xl outline-none text-cyan-800 font-semibold" oninput="calcBill()">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                        <h2 class="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                            <div class="bg-purple-100 text-purple-600 p-1.5 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            </div>
+                            ค่าบริการอื่นๆ
+                        </h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1.5">ชื่อรายการ</label>
+                                <input type="text" id="bExtraName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1.5">จำนวนเงิน (บาท)</label>
+                                <input type="number" id="bExtraFee" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                            </div>
+                        </div>
+                    </section>
+
+                    <button onclick="saveAndIssueBill()" class="w-full bg-green-500 text-white px-4 py-4 rounded-xl font-bold text-lg hover:bg-green-600 shadow-md">
+                        💾 บันทึกบิลและอัปเดตมิเตอร์
+                    </button>
+                    <p class="text-xs text-center text-slate-500 mt-2">* เมื่อกดบันทึก มิเตอร์ใหม่จะถูกจำไว้เป็นมิเตอร์เก่าของเดือนถัดไปอัตโนมัติ</p>
+                </div>
+
+                <!-- Right: Invoice Area -->
+                <div class="w-full lg:w-2/5 print-container">
+                    <!-- Actions above bill -->
+                    <div class="flex gap-2 mb-3 justify-end no-print">
+                        <button onclick="window.print()" class="bg-white text-slate-700 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 shadow-sm hover:bg-slate-50 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg> พิมพ์
+                        </button>
+                        <button onclick="exportToImage()" class="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-primary-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> เซฟรูปลงเครื่อง (ส่ง LINE)
                         </button>
                     </div>
-                    
-                    <div class="p-6">
-                        <!-- Invoice Header Details -->
-                        <div class="flex justify-between items-end mb-6 pb-4 border-b-2 border-dashed border-slate-200">
+
+                    <div id="invoiceArea" class="bg-white shadow-xl overflow-hidden lg:sticky lg:top-24 receipt-edge border border-slate-100 lg:border-none rounded-t-2xl lg:rounded-2xl invoice-wrap">
+                        
+                        <div class="hidden print-only text-center pt-8 pb-4">
+                            <h1 class="text-2xl font-bold text-slate-800">ใบแจ้งหนี้ / ใบเสร็จรับเงิน</h1>
+                            <p class="text-slate-500">ใบแจ้งหนี้ค่าเช่าห้องพัก</p>
+                        </div>
+
+                        <div class="bg-slate-800 px-6 py-5 text-white flex justify-between items-center no-print" id="invoiceHeaderBar">
                             <div>
-                                <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">ห้อง / Room</p>
-                                <p class="text-3xl font-bold text-slate-800" id="outRoomNo">-</p>
+                                <h3 class="text-lg font-bold tracking-widest uppercase">INVOICE</h3>
+                                <p class="text-slate-400 text-xs">บิลสรุปยอด</p>
                             </div>
-                            <div class="text-right">
-                                <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">วันที่ / Date</p>
-                                <p class="text-sm font-medium text-slate-700" id="outDate"></p>
-                            </div>
-                        </div>
-
-                        <!-- Bill Line Items -->
-                        <div class="space-y-4 mb-6 text-sm">
-                            <!-- Rent -->
-                            <div class="flex justify-between items-end">
-                                <div>
-                                    <p class="font-semibold text-slate-700">ค่าเช่าห้องพัก</p>
-                                </div>
-                                <p class="font-medium text-slate-800" id="outRent">0.00</p>
-                            </div>
-                            
-                            <!-- Electricity -->
-                            <div class="flex justify-between items-end">
-                                <div>
-                                    <p class="font-semibold text-slate-700">ค่าไฟ</p>
-                                    <p class="text-xs text-slate-500">
-                                        (<span id="oElecNew">0</span> - <span id="oElecOld">0</span>) = <span id="outElecUnits" class="font-medium text-slate-700">0</span> หน่วย 
-                                        x <span id="outElecRate">0</span> บ.
-                                    </p>
-                                </div>
-                                <p class="font-medium text-slate-800" id="outElecTotal">0.00</p>
-                            </div>
-
-                            <!-- Water -->
-                            <div class="flex justify-between items-end">
-                                <div>
-                                    <p class="font-semibold text-slate-700">ค่าน้ำประปา</p>
-                                    <p class="text-xs text-slate-500">
-                                        (<span id="oWaterNew">0</span> - <span id="oWaterOld">0</span>) = <span id="outWaterUnits" class="font-medium text-slate-700">0</span> หน่วย 
-                                        x <span id="outWaterRate">0</span> บ.
-                                    </p>
-                                </div>
-                                <p class="font-medium text-slate-800" id="outWaterTotal">0.00</p>
-                            </div>
-                            
-                            <!-- Extra -->
-                            <div class="flex justify-between items-end" id="extraRow">
-                                <div>
-                                    <p class="font-semibold text-slate-700" id="outExtraName">ค่าขยะ</p>
-                                </div>
-                                <p class="font-medium text-slate-800" id="outExtraFee">0.00</p>
-                            </div>
-                        </div>
-
-                        <!-- Grand Total -->
-                        <div class="bg-primary-50 rounded-xl p-4 border border-primary-100 flex justify-between items-center">
-                            <p class="text-sm font-bold text-primary-800 uppercase tracking-wide">รวมทั้งสิ้น</p>
-                            <p class="text-2xl font-bold text-primary-600"><span id="outGrandTotal">0.00</span> <span class="text-lg">฿</span></p>
                         </div>
                         
-                        <!-- Print Footer Signature Area -->
-                        <div class="hidden print-only mt-12 text-sm flex justify-between px-8 text-slate-600">
-                            <div class="text-center">
-                                <p>...........................................................</p>
-                                <p class="mt-2">ผู้ชำระเงิน</p>
-                                <p class="mt-1 text-xs">วันที่ .............../.............../...............</p>
+                        <div class="p-6 pb-2" style="background-color: white;">
+                            <div class="flex justify-between items-end mb-6 pb-4 border-b-2 border-dashed border-slate-200">
+                                <div>
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">ห้อง / Room</p>
+                                    <p class="text-3xl font-bold text-slate-800" id="outRoomNo">-</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">วันที่ / Date</p>
+                                    <p class="text-sm font-medium text-slate-700" id="outDate"></p>
+                                </div>
                             </div>
-                            <div class="text-center">
-                                <p>...........................................................</p>
-                                <p class="mt-2">ผู้รับเงิน</p>
-                                <p class="mt-1 text-xs">วันที่ .............../.............../...............</p>
+
+                            <div class="space-y-4 mb-6 text-sm">
+                                <div class="flex justify-between items-end">
+                                    <div><p class="font-semibold text-slate-700">ค่าเช่าห้องพัก</p></div>
+                                    <p class="font-medium text-slate-800" id="outRent">0.00</p>
+                                </div>
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <p class="font-semibold text-slate-700">ค่าไฟ</p>
+                                        <p class="text-xs text-slate-500">(<span id="oElecNew">0</span> - <span id="oElecOld">0</span>) = <span id="outElecUnits" class="font-medium text-slate-700">0</span> หน่วย x <span id="outElecRate">0</span> บ.</p>
+                                    </div>
+                                    <p class="font-medium text-slate-800" id="outElecTotal">0.00</p>
+                                </div>
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <p class="font-semibold text-slate-700">ค่าน้ำประปา</p>
+                                        <p class="text-xs text-slate-500">(<span id="oWaterNew">0</span> - <span id="oWaterOld">0</span>) = <span id="outWaterUnits" class="font-medium text-slate-700">0</span> หน่วย x <span id="outWaterRate">0</span> บ.</p>
+                                    </div>
+                                    <p class="font-medium text-slate-800" id="outWaterTotal">0.00</p>
+                                </div>
+                                <div class="flex justify-between items-end" id="extraRow">
+                                    <div><p class="font-semibold text-slate-700" id="outExtraName">ค่าบริการ</p></div>
+                                    <p class="font-medium text-slate-800" id="outExtraFee">0.00</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-primary-50 rounded-xl p-4 border border-primary-100 flex justify-between items-center mb-4">
+                                <p class="text-sm font-bold text-primary-800 uppercase tracking-wide">รวมทั้งสิ้น</p>
+                                <p class="text-2xl font-bold text-primary-600"><span id="outGrandTotal">0.00</span> <span class="text-lg">฿</span></p>
+                            </div>
+                            
+                            <!-- This signature block is hidden in the web view, but will show up in Print and Canvas Export -->
+                            <div id="signatureBlock" class="hidden mt-12 text-sm flex justify-between px-8 text-slate-600">
+                                <div class="text-center">
+                                    <p>...........................................................</p>
+                                    <p class="mt-2">ผู้ชำระเงิน</p>
+                                    <p class="mt-1 text-xs">วันที่ .............../.............../...............</p>
+                                </div>
+                                <div class="text-center">
+                                    <p>...........................................................</p>
+                                    <p class="mt-2">ผู้รับเงิน</p>
+                                    <p class="mt-1 text-xs">วันที่ .............../.............../...............</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
     </main>
 
-    <!-- Mobile Floating Bottom Bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-safe shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] lg:hidden z-50 flex justify-between items-center no-print">
+    <!-- Mobile Floating Bottom Bar for Billing View -->
+    <div id="floatBar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-safe shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] lg:hidden z-50 flex justify-between items-center no-print hidden">
         <div>
             <p class="text-xs text-slate-500 font-medium">ยอดรวม (ห้อง <span id="floatRoom">-</span>)</p>
             <p class="text-2xl font-bold text-primary-600 leading-none mt-1"><span id="floatTotal">0.00</span> <span class="text-lg">฿</span></p>
         </div>
-        <button onclick="document.getElementById('invoiceArea').scrollIntoView()" class="bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md hover:bg-primary-700 active:scale-95 transition-all">
+        <button onclick="document.getElementById('invoiceArea').scrollIntoView()" class="bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md">
             ดูบิลเต็ม
         </button>
     </div>
 
+    <!-- Scripts for App Logic -->
     <script>
-        window.onload = () => {
-            const today = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('outDate').textContent = today.toLocaleDateString('th-TH', options);
-            calc();
+        // Default State
+        let state = {
+            settings: { elecRate: 9, waterRate: 10, extraName: 'ค่าขยะ', extraFee: 50 },
+            rooms: [], // array of objects
+            history: [] // ready for future
         };
 
-        function calc() {
-            // Room
-            const roomNo = document.getElementById('roomNo').value || '-';
-            const roomRent = parseFloat(document.getElementById('roomRent').value) || 0;
+        // Initialize App
+        window.onload = () => {
+            loadState();
             
-            // Rates
-            const elecRate = parseFloat(document.getElementById('elecRate').value) || 0;
-            const waterRate = parseFloat(document.getElementById('waterRate').value) || 0;
+            // Generate some dummy data if it's the very first time ever
+            if(state.rooms.length === 0) {
+                state.rooms = [
+                    { id: '101', rent: 2000, elecMeter: 1250, waterMeter: 340 },
+                    { id: '102', rent: 2500, elecMeter: 980, waterMeter: 125 },
+                ];
+                saveState();
+            }
+
+            nav('dashboard');
             
-            // Electricity
-            const elecOld = parseFloat(document.getElementById('elecOld').value) || 0;
-            const elecNew = parseFloat(document.getElementById('elecNew').value) || 0;
-            let elecUnits = elecNew - elecOld;
-            if (elecUnits < 0 || (document.getElementById('elecOld').value === '' && document.getElementById('elecNew').value === '')) elecUnits = 0; 
+            // Set today's date in bill
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('outDate').textContent = new Date().toLocaleDateString('th-TH', options);
+            
+            // Add CSS rule for signature block in print mode
+            const style = document.createElement('style');
+            style.innerHTML = `@media print { #signatureBlock { display: flex !important; } }`;
+            document.head.appendChild(style);
+        };
+
+        // State Management
+        function loadState() {
+            const saved = localStorage.getItem('dormManagerState');
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+        }
+        function saveState() {
+            localStorage.setItem('dormManagerState', JSON.stringify(state));
+        }
+
+        // Navigation
+        function nav(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            
+            document.getElementById('floatBar').classList.add('hidden'); // Hide float bar by default
+            window.scrollTo(0,0);
+
+            if (viewId === 'dashboard') renderDashboard();
+            if (viewId === 'settings') renderSettings();
+            if (viewId === 'room-form') {
+                document.getElementById('roomFormTitle').innerText = 'เพิ่มห้องใหม่';
+                document.getElementById('editRoomId').value = '';
+                document.getElementById('fRoomId').value = '';
+                document.getElementById('fRent').value = '';
+                document.getElementById('fElecMeter').value = '';
+                document.getElementById('fWaterMeter').value = '';
+            }
+        }
+
+        // --- DASHBOARD ---
+        function renderDashboard() {
+            const list = document.getElementById('roomList');
+            list.innerHTML = '';
+            
+            // Sort by room id naturally
+            const sortedRooms = [...state.rooms].sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true}));
+
+            sortedRooms.forEach(room => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-slate-800">ห้อง ${room.id}</h3>
+                            <button onclick="editRoom(event, '${room.id}')" class="text-slate-400 hover:text-primary-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-4">ค่าเช่า: ${formatN(room.rent)} ฿</p>
+                    </div>
+                    <button onclick="openBilling('${room.id}')" class="w-full bg-primary-50 text-primary-700 font-semibold py-2.5 rounded-xl hover:bg-primary-100 mt-2 transition-colors">
+                        ออกบิลเดือนนี้
+                    </button>
+                `;
+                list.appendChild(card);
+            });
+
+            if(state.rooms.length === 0) {
+                list.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">ยังไม่มีข้อมูลห้องพัก กรุณากด "+ เพิ่มห้อง" ด้านบน</div>`;
+            }
+        }
+
+        // --- SETTINGS ---
+        function renderSettings() {
+            document.getElementById('gElecRate').value = state.settings.elecRate;
+            document.getElementById('gWaterRate').value = state.settings.waterRate;
+            document.getElementById('gExtraName').value = state.settings.extraName;
+            document.getElementById('gExtraFee').value = state.settings.extraFee;
+        }
+        function saveSettings() {
+            state.settings.elecRate = parseFloat(document.getElementById('gElecRate').value) || 0;
+            state.settings.waterRate = parseFloat(document.getElementById('gWaterRate').value) || 0;
+            state.settings.extraName = document.getElementById('gExtraName').value || '';
+            state.settings.extraFee = parseFloat(document.getElementById('gExtraFee').value) || 0;
+            saveState();
+            nav('dashboard');
+        }
+
+        // --- ROOM MANAGEMENT ---
+        function saveRoom() {
+            const oldId = document.getElementById('editRoomId').value;
+            const id = document.getElementById('fRoomId').value.trim();
+            const rent = parseFloat(document.getElementById('fRent').value) || 0;
+            const elec = parseFloat(document.getElementById('fElecMeter').value) || 0;
+            const water = parseFloat(document.getElementById('fWaterMeter').value) || 0;
+
+            if(!id) return alert('กรุณากรอกหมายเลขห้อง');
+
+            const newRoom = { id, rent, elecMeter: elec, waterMeter: water };
+
+            if (oldId) {
+                const idx = state.rooms.findIndex(r => r.id === oldId);
+                if(idx !== -1) {
+                    if(id !== oldId && state.rooms.find(r => r.id === id)) return alert('หมายเลขห้องนี้มีอยู่แล้ว');
+                    state.rooms[idx] = newRoom;
+                }
+            } else {
+                if(state.rooms.find(r => r.id === id)) return alert('หมายเลขห้องนี้มีอยู่แล้ว');
+                state.rooms.push(newRoom);
+            }
+            saveState();
+            nav('dashboard');
+        }
+
+        function editRoom(e, roomId) {
+            e.stopPropagation();
+            const room = state.rooms.find(r => r.id === roomId);
+            if(room) {
+                document.getElementById('roomFormTitle').innerText = `แก้ไขห้อง ${room.id}`;
+                document.getElementById('editRoomId').value = room.id;
+                document.getElementById('fRoomId').value = room.id;
+                document.getElementById('fRent').value = room.rent;
+                document.getElementById('fElecMeter').value = room.elecMeter;
+                document.getElementById('fWaterMeter').value = room.waterMeter;
+                nav('room-form');
+            }
+        }
+
+        function deleteRoom() {
+            const roomId = document.getElementById('bRoomId').value;
+            if(confirm(`ยืนยันการลบห้อง ${roomId}?`)) {
+                state.rooms = state.rooms.filter(r => r.id !== roomId);
+                saveState();
+                nav('dashboard');
+            }
+        }
+
+        // --- BILLING ---
+        function openBilling(roomId) {
+            const room = state.rooms.find(r => r.id === roomId);
+            if(!room) return;
+            
+            nav('billing');
+            document.getElementById('floatBar').classList.remove('hidden');
+
+            document.getElementById('billRoomTitle').innerText = room.id;
+            document.getElementById('bRoomId').value = room.id;
+            
+            // Pre-fill inputs from state
+            document.getElementById('bRent').value = room.rent;
+            
+            document.getElementById('bElecRate').value = state.settings.elecRate;
+            document.getElementById('bWaterRate').value = state.settings.waterRate;
+            
+            document.getElementById('bElecOld').value = room.elecMeter;
+            document.getElementById('bWaterOld').value = room.waterMeter;
+            
+            document.getElementById('bExtraName').value = state.settings.extraName;
+            document.getElementById('bExtraFee').value = state.settings.extraFee;
+            
+            // Clear new meters for the new month
+            document.getElementById('bElecNew').value = '';
+            document.getElementById('bWaterNew').value = '';
+
+            calcBill();
+        }
+
+        function calcBill() {
+            const roomNo = document.getElementById('bRoomId').value;
+            const roomRent = parseFloat(document.getElementById('bRent').value) || 0;
+            const elecRate = parseFloat(document.getElementById('bElecRate').value) || 0;
+            const waterRate = parseFloat(document.getElementById('bWaterRate').value) || 0;
+            
+            const elecOld = parseFloat(document.getElementById('bElecOld').value) || 0;
+            const elecNewVal = document.getElementById('bElecNew').value;
+            const elecNew = parseFloat(elecNewVal) || 0;
+            
+            const waterOld = parseFloat(document.getElementById('bWaterOld').value) || 0;
+            const waterNewVal = document.getElementById('bWaterNew').value;
+            const waterNew = parseFloat(waterNewVal) || 0;
+            
+            const extraName = document.getElementById('bExtraName').value || '';
+            const extraFee = parseFloat(document.getElementById('bExtraFee').value) || 0;
+
+            let elecUnits = elecNewVal === '' ? 0 : Math.max(0, elecNew - elecOld);
+            let waterUnits = waterNewVal === '' ? 0 : Math.max(0, waterNew - waterOld);
+            
             const elecTotal = elecUnits * elecRate;
-
-            // Water
-            const waterOld = parseFloat(document.getElementById('waterOld').value) || 0;
-            const waterNew = parseFloat(document.getElementById('waterNew').value) || 0;
-            let waterUnits = waterNew - waterOld;
-            if (waterUnits < 0 || (document.getElementById('waterOld').value === '' && document.getElementById('waterNew').value === '')) waterUnits = 0; 
             const waterTotal = waterUnits * waterRate;
-            
-            // Extra Fee
-            const extraName = document.getElementById('extraName').value || 'ค่าบริการอื่นๆ';
-            const extraFee = parseFloat(document.getElementById('extraFee').value) || 0;
-
-            // Total
             const grandTotal = roomRent + elecTotal + waterTotal + extraFee;
 
-            // Update UI
+            // Update Invoice UI
             document.getElementById('outRoomNo').textContent = roomNo;
             document.getElementById('floatRoom').textContent = roomNo;
             document.getElementById('outRent').textContent = formatN(roomRent);
             
             document.getElementById('oElecOld').textContent = elecOld;
-            document.getElementById('oElecNew').textContent = elecNew;
+            document.getElementById('oElecNew').textContent = elecNewVal === '' ? elecOld : elecNew;
             document.getElementById('outElecUnits').textContent = elecUnits;
             document.getElementById('outElecRate').textContent = elecRate;
             document.getElementById('outElecTotal').textContent = formatN(elecTotal);
             
             document.getElementById('oWaterOld').textContent = waterOld;
-            document.getElementById('oWaterNew').textContent = waterNew;
+            document.getElementById('oWaterNew').textContent = waterNewVal === '' ? waterOld : waterNew;
             document.getElementById('outWaterUnits').textContent = waterUnits;
             document.getElementById('outWaterRate').textContent = waterRate;
             document.getElementById('outWaterTotal').textContent = formatN(waterTotal);
             
-            if(extraFee > 0 || document.getElementById('extraName').value !== '') {
+            if(extraFee > 0 || extraName !== '') {
                 document.getElementById('extraRow').style.display = 'flex';
-                document.getElementById('outExtraName').textContent = extraName;
+                document.getElementById('outExtraName').textContent = extraName || 'ค่าบริการอื่นๆ';
                 document.getElementById('outExtraFee').textContent = formatN(extraFee);
             } else {
                 document.getElementById('extraRow').style.display = 'none';
@@ -344,6 +590,79 @@
 
             document.getElementById('outGrandTotal').textContent = formatN(grandTotal);
             document.getElementById('floatTotal').textContent = formatN(grandTotal);
+        }
+
+        function saveAndIssueBill() {
+            const roomId = document.getElementById('bRoomId').value;
+            const room = state.rooms.find(r => r.id === roomId);
+            if(!room) return;
+
+            const elecNew = document.getElementById('bElecNew').value;
+            const waterNew = document.getElementById('bWaterNew').value;
+
+            if(elecNew === '' || waterNew === '') {
+                if(!confirm('คุณยังไม่ได้กรอกมิเตอร์ใหม่ ต้องการบันทึกเลยหรือไม่? (มิเตอร์เก่าจะไม่ถูกอัปเดต)')) return;
+            }
+
+            // Update room meters
+            if(elecNew !== '') room.elecMeter = parseFloat(elecNew);
+            if(waterNew !== '') room.waterMeter = parseFloat(waterNew);
+
+            // Record to history (Basic implementation for future)
+            state.history.push({
+                date: new Date().toISOString(),
+                roomId: room.id,
+                total: parseFloat(document.getElementById('outGrandTotal').textContent.replace(/,/g, ''))
+            });
+
+            saveState();
+            
+            alert(`บันทึกบิลห้อง ${roomId} สำเร็จ! ข้อมูลมิเตอร์ถูกอัปเดตแล้ว`);
+            nav('dashboard');
+        }
+
+        // --- HTML2CANVAS IMAGE EXPORT ---
+        function exportToImage() {
+            const invoiceArea = document.getElementById('invoiceArea');
+            const sigBlock = document.getElementById('signatureBlock');
+            const headerBar = document.getElementById('invoiceHeaderBar');
+            
+            // Temporary adjustments for a perfect image export
+            sigBlock.style.display = 'flex';
+            headerBar.style.display = 'none';
+            invoiceArea.style.border = 'none';
+            invoiceArea.style.borderRadius = '0';
+            invoiceArea.style.boxShadow = 'none';
+            
+            // Add title for the image
+            const titleDiv = document.createElement('div');
+            titleDiv.innerHTML = `
+                <div class="text-center pt-8 pb-4" style="background: white;">
+                    <h1 class="text-2xl font-bold text-slate-800">ใบแจ้งหนี้ / ใบเสร็จรับเงิน</h1>
+                    <p class="text-slate-500">ใบแจ้งหนี้ค่าเช่าห้องพัก</p>
+                </div>
+            `;
+            invoiceArea.insertBefore(titleDiv, invoiceArea.firstChild);
+
+            html2canvas(invoiceArea, { 
+                scale: 2,
+                backgroundColor: "#ffffff",
+                useCORS: true
+            }).then(canvas => {
+                // Revert adjustments
+                sigBlock.style.display = 'none';
+                headerBar.style.display = 'flex';
+                invoiceArea.style.border = '';
+                invoiceArea.style.borderRadius = '';
+                invoiceArea.style.boxShadow = '';
+                invoiceArea.removeChild(titleDiv);
+
+                // Download
+                const link = document.createElement('a');
+                link.download = `Bill_Room_${document.getElementById('outRoomNo').textContent}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
         }
 
         function formatN(num) {
