@@ -8,15 +8,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Sarabun for a formal Thai document look -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
+                    fontFamily: { sans: ['Sarabun', 'sans-serif'] },
                     colors: {
-                        primary: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }
+                        // Corporate Navy Blue for a formal look
+                        primary: { 50: '#f8fafc', 100: '#f1f5f9', 500: '#475569', 600: '#334155', 700: '#1e293b' }
                     }
                 }
             }
@@ -24,7 +25,7 @@
     </script>
     <style>
         body { 
-            background-color: #f8fafc; 
+            background-color: #f1f5f9; 
             -webkit-tap-highlight-color: transparent; 
         }
         input[type=number]::-webkit-inner-spin-button, 
@@ -33,41 +34,39 @@
         }
         html { scroll-behavior: smooth; }
         
-        .receipt-edge {
-            background: linear-gradient(-45deg, transparent 12px, white 0), linear-gradient(45deg, transparent 12px, white 0);
-            background-repeat: repeat-x;
-            background-position: left bottom;
-            background-size: 16px 16px;
-            padding-bottom: 24px;
-        }
-
         .view { display: none; }
         .view.active { display: block; }
+
+        /* Formal Invoice Container */
+        .invoice-wrap {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
 
         @media print {
             body { background: white; padding: 0 !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .receipt-edge { background: none; padding-bottom: 0; }
             .shadow-xl, .shadow-sm { box-shadow: none !important; }
             .print-container { max-width: 100% !important; border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
-            .border-slate-100 { border-color: #e2e8f0 !important; }
-            .invoice-wrap { position: absolute; left: 0; top: 0; }
+            .border-slate-100, .border-slate-300 { border-color: #e2e8f0 !important; }
+            .invoice-wrap { position: absolute; left: 0; top: 0; border: none !important; box-shadow: none !important; }
         }
     </style>
 </head>
 <body class="text-slate-800 pb-24 lg:pb-8">
 
     <!-- Navbar -->
-    <header class="bg-primary-600 text-white sticky top-0 z-40 shadow-md no-print">
+    <header class="bg-primary-700 text-white sticky top-0 z-40 shadow no-print">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-2" onclick="nav('dashboard')" style="cursor:pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                <h1 class="text-lg font-semibold tracking-wide">DormManager</h1>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                <h1 class="text-lg font-medium tracking-wide">DormManager System</h1>
             </div>
             <div class="flex gap-4">
-                <button onclick="nav('settings')" class="text-white/80 hover:text-white" title="ตั้งค่าเริ่มต้น">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <button onclick="nav('settings')" class="text-slate-300 hover:text-white transition-colors" title="ตั้งค่าเริ่มต้น">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </button>
             </div>
         </div>
@@ -77,9 +76,9 @@
         
         <!-- DASHBOARD VIEW -->
         <div id="view-dashboard" class="view active no-print">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-slate-800">จัดการห้องพัก</h2>
-                <button onclick="nav('room-form')" class="bg-primary-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary-700 shadow-sm">+ เพิ่มห้อง</button>
+            <div class="flex justify-between items-center mb-6 border-b border-slate-300 pb-3">
+                <h2 class="text-xl font-semibold text-slate-800">จัดการห้องพัก (Room Management)</h2>
+                <button onclick="nav('room-form')" class="bg-primary-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-primary-700 shadow-sm transition-colors">+ เพิ่มห้องพัก</button>
             </div>
 
             <div id="roomList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -89,244 +88,255 @@
 
         <!-- SETTINGS VIEW -->
         <div id="view-settings" class="view no-print max-w-xl mx-auto">
-            <div class="flex items-center gap-3 mb-6">
-                <button onclick="nav('dashboard')" class="p-2 bg-white rounded-full shadow-sm hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                <h2 class="text-xl font-bold text-slate-800">ตั้งค่าเริ่มต้น (ส่วนกลาง)</h2>
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-300 pb-3">
+                <button onclick="nav('dashboard')" class="text-slate-500 hover:text-slate-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <h2 class="text-xl font-semibold text-slate-800">ตั้งค่าเริ่มต้นส่วนกลาง (Global Settings)</h2>
             </div>
             
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-5">
-                <p class="text-sm text-slate-500 mb-2">ค่าเหล่านี้จะถูกใช้เป็นค่าเริ่มต้นเมื่อทำบิลให้ทุกห้อง</p>
+            <div class="bg-white rounded-md p-6 shadow-sm border border-slate-300 space-y-4">
+                <p class="text-sm text-slate-500 mb-4">ค่าเหล่านี้จะถูกใช้เป็นค่าเริ่มต้นเมื่อทำบิลให้ทุกห้อง</p>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">ค่าไฟ (บาท/หน่วย)</label>
-                    <input type="number" id="gElecRate" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    <input type="number" id="gElecRate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">ค่าน้ำ (บาท/หน่วย)</label>
-                    <input type="number" id="gWaterRate" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    <input type="number" id="gWaterRate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อค่าบริการอื่นๆ (ค่าเริ่มต้น)</label>
-                    <input type="text" id="gExtraName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    <input type="text" id="gExtraName" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงินค่าบริการอื่นๆ (บาท)</label>
-                    <input type="number" id="gExtraFee" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    <input type="number" id="gExtraFee" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
-                <button onclick="saveSettings()" class="w-full bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-primary-700 mt-4 shadow-sm">บันทึกการตั้งค่า</button>
+                <div class="pt-2">
+                    <button onclick="saveSettings()" class="w-full bg-primary-600 text-white px-4 py-2.5 rounded font-medium hover:bg-primary-700 shadow-sm transition-colors">บันทึกการตั้งค่า</button>
+                </div>
             </div>
         </div>
 
         <!-- ROOM FORM VIEW (Add/Edit) -->
         <div id="view-room-form" class="view no-print max-w-xl mx-auto">
-             <div class="flex items-center gap-3 mb-6">
-                <button onclick="nav('dashboard')" class="p-2 bg-white rounded-full shadow-sm hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                <h2 class="text-xl font-bold text-slate-800" id="roomFormTitle">เพิ่มห้องใหม่</h2>
+             <div class="flex items-center gap-3 mb-6 border-b border-slate-300 pb-3">
+                <button onclick="nav('dashboard')" class="text-slate-500 hover:text-slate-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <h2 class="text-xl font-semibold text-slate-800" id="roomFormTitle">เพิ่มข้อมูลห้องพักใหม่</h2>
             </div>
             
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-5">
+            <div class="bg-white rounded-md p-6 shadow-sm border border-slate-300 space-y-4">
                 <input type="hidden" id="editRoomId">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">หมายเลขห้อง</label>
-                    <input type="text" id="fRoomId" placeholder="เช่น 101" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    <input type="text" id="fRoomId" placeholder="เช่น 101" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">ค่าเช่ารายเดือน (บาท)</label>
-                    <input type="number" id="fRent" placeholder="3500" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    <input type="number" id="fRent" placeholder="0.00" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">เลขมิเตอร์ไฟ (ล่าสุด)</label>
-                        <input type="number" id="fElecMeter" placeholder="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                        <input type="number" id="fElecMeter" placeholder="0" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">เลขมิเตอร์น้ำ (ล่าสุด)</label>
-                        <input type="number" id="fWaterMeter" placeholder="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                        <input type="number" id="fWaterMeter" placeholder="0" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                     </div>
                 </div>
-                <button onclick="saveRoom()" class="w-full bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold mt-4 shadow-sm hover:bg-primary-700">บันทึกข้อมูลห้อง</button>
+                <div class="pt-2">
+                    <button onclick="saveRoom()" class="w-full bg-primary-600 text-white px-4 py-2.5 rounded font-medium shadow-sm hover:bg-primary-700 transition-colors">บันทึกข้อมูลห้อง</button>
+                </div>
             </div>
         </div>
 
         <!-- BILLING VIEW -->
         <div id="view-billing" class="view">
-            <div class="flex items-center justify-between mb-6 no-print">
+            <div class="flex items-center justify-between mb-6 border-b border-slate-300 pb-3 no-print">
                 <div class="flex items-center gap-3">
-                    <button onclick="nav('dashboard')" class="p-2 bg-white rounded-full shadow-sm hover:bg-slate-50"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                    <h2 class="text-xl font-bold text-slate-800">ออกบิลห้อง <span id="billRoomTitle" class="text-primary-600"></span></h2>
+                    <button onclick="nav('dashboard')" class="text-slate-500 hover:text-slate-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                    <h2 class="text-xl font-semibold text-slate-800">ออกใบแจ้งหนี้ - ห้อง <span id="billRoomTitle" class="text-primary-700"></span></h2>
                 </div>
-                <button onclick="deleteRoom()" class="text-red-500 text-sm hover:underline">ลบห้องนี้</button>
+                <button onclick="deleteRoom()" class="text-red-600 text-sm hover:underline font-medium">ลบข้อมูลห้องนี้</button>
             </div>
 
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Left: Input -->
-                <div class="w-full lg:w-3/5 space-y-5 no-print" id="billingInputsArea">
+                <div class="w-full lg:w-3/5 space-y-4 no-print" id="billingInputsArea">
                     <input type="hidden" id="bRoomId">
                     
-                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                    <!-- Form sections: Clean & Structured -->
+                    <section class="bg-white rounded-md p-5 border border-slate-300 shadow-sm">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1.5">ค่าเช่า (บาท)</label>
-                                <input type="number" id="bRent" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">ค่าเช่าห้องพัก (บาท)</label>
+                                <input type="number" id="bRent" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
                             </div>
                         </div>
                     </section>
 
-                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-base font-semibold text-slate-700 flex items-center gap-2">
-                                <div class="bg-amber-100 text-amber-600 p-1.5 rounded-lg">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                </div>
-                                ค่าไฟฟ้า
-                            </h2>
-                            <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                                <label class="text-xs text-slate-500">หน่วยละ</label>
-                                <input type="number" id="bElecRate" class="w-10 text-center bg-transparent text-amber-600 font-bold outline-none" oninput="calcBill()">
-                                <span class="text-xs text-slate-500">บ.</span>
+                    <section class="bg-white rounded-md p-5 border border-slate-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">ค่าไฟฟ้า</h2>
+                            <div class="flex items-center gap-2 text-sm text-slate-600">
+                                <label>หน่วยละ</label>
+                                <input type="number" id="bElecRate" class="w-12 text-center border-b border-slate-300 focus:border-primary-500 outline-none font-medium" oninput="calcBill()">
+                                <span>บาท</span>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์เก่า (ดึงมาอัตโนมัติ)</label>
-                                <input type="number" id="bElecOld" class="w-full px-4 py-3 bg-slate-100 text-slate-500 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                                <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">เลขมิเตอร์เดิม</label>
+                                <input type="number" id="bElecOld" class="w-full px-3 py-2 bg-slate-100 text-slate-500 border border-slate-200 rounded outline-none" oninput="calcBill()">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1.5 text-primary-600 font-bold">จดมิเตอร์ใหม่</label>
-                                <input type="number" id="bElecNew" class="w-full px-4 py-3 bg-amber-50 border border-amber-300 rounded-xl outline-none text-amber-800 font-semibold" oninput="calcBill()">
+                                <label class="block text-xs font-bold text-primary-700 mb-1 uppercase tracking-wide">เลขมิเตอร์ใหม่</label>
+                                <input type="number" id="bElecNew" class="w-full px-3 py-2 bg-white border border-primary-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none text-slate-800 font-semibold transition-all" oninput="calcBill()">
                             </div>
                         </div>
                     </section>
 
-                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-base font-semibold text-slate-700 flex items-center gap-2">
-                                <div class="bg-cyan-100 text-cyan-600 p-1.5 rounded-lg">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.34A5.84 5.84 0 0 1 2 12.28 6 6 0 0 1 8 6a6 6 0 0 1 6 6.28 5.84 5.84 0 0 1 0 2.38 6 6 0 0 0 6 0z"></path></svg>
-                                </div>
-                                ค่าน้ำประปา
-                            </h2>
-                            <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                                <label class="text-xs text-slate-500">หน่วยละ</label>
-                                <input type="number" id="bWaterRate" class="w-10 text-center bg-transparent text-cyan-600 font-bold outline-none" oninput="calcBill()">
-                                <span class="text-xs text-slate-500">บ.</span>
+                    <section class="bg-white rounded-md p-5 border border-slate-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">ค่าน้ำประปา</h2>
+                            <div class="flex items-center gap-2 text-sm text-slate-600">
+                                <label>หน่วยละ</label>
+                                <input type="number" id="bWaterRate" class="w-12 text-center border-b border-slate-300 focus:border-primary-500 outline-none font-medium" oninput="calcBill()">
+                                <span>บาท</span>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1.5">มิเตอร์เก่า</label>
-                                <input type="number" id="bWaterOld" class="w-full px-4 py-3 bg-slate-100 text-slate-500 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                                <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">เลขมิเตอร์เดิม</label>
+                                <input type="number" id="bWaterOld" class="w-full px-3 py-2 bg-slate-100 text-slate-500 border border-slate-200 rounded outline-none" oninput="calcBill()">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1.5 text-primary-600 font-bold">จดมิเตอร์ใหม่</label>
-                                <input type="number" id="bWaterNew" class="w-full px-4 py-3 bg-cyan-50 border border-cyan-300 rounded-xl outline-none text-cyan-800 font-semibold" oninput="calcBill()">
+                                <label class="block text-xs font-bold text-primary-700 mb-1 uppercase tracking-wide">เลขมิเตอร์ใหม่</label>
+                                <input type="number" id="bWaterNew" class="w-full px-3 py-2 bg-white border border-primary-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none text-slate-800 font-semibold transition-all" oninput="calcBill()">
                             </div>
                         </div>
                     </section>
 
-                    <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-                        <h2 class="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                            <div class="bg-purple-100 text-purple-600 p-1.5 rounded-lg">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                            </div>
-                            ค่าบริการอื่นๆ
-                        </h2>
+                    <section class="bg-white rounded-md p-5 border border-slate-300 shadow-sm">
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">ค่าใช้จ่ายอื่นๆ</h2>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1.5">ชื่อรายการ</label>
-                                <input type="text" id="bExtraName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                                <label class="block text-xs font-medium text-slate-500 mb-1">รายการ</label>
+                                <input type="text" id="bExtraName" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1.5">จำนวนเงิน (บาท)</label>
-                                <input type="number" id="bExtraFee" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" oninput="calcBill()">
+                                <label class="block text-xs font-medium text-slate-500 mb-1">จำนวนเงิน (บาท)</label>
+                                <input type="number" id="bExtraFee" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
                             </div>
                         </div>
                     </section>
 
-                    <button onclick="saveAndIssueBill()" class="w-full bg-green-500 text-white px-4 py-4 rounded-xl font-bold text-lg hover:bg-green-600 shadow-md">
-                        💾 บันทึกบิลและอัปเดตมิเตอร์
-                    </button>
-                    <p class="text-xs text-center text-slate-500 mt-2">* เมื่อกดบันทึก มิเตอร์ใหม่จะถูกจำไว้เป็นมิเตอร์เก่าของเดือนถัดไปอัตโนมัติ</p>
+                    <div class="pt-2">
+                        <button onclick="saveAndIssueBill()" class="w-full bg-slate-800 text-white px-4 py-3 rounded text-sm font-semibold hover:bg-slate-700 shadow-sm transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                            บันทึกข้อมูลและอัปเดตมิเตอร์
+                        </button>
+                        <p class="text-xs text-center text-slate-500 mt-2">ข้อมูลมิเตอร์ใหม่จะถูกนำไปใช้เป็นมิเตอร์เดิมในรอบบิลถัดไป</p>
+                    </div>
                 </div>
 
                 <!-- Right: Invoice Area -->
                 <div class="w-full lg:w-2/5 print-container">
                     <!-- Actions above bill -->
                     <div class="flex gap-2 mb-3 justify-end no-print">
-                        <button onclick="window.print()" class="bg-white text-slate-700 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 shadow-sm hover:bg-slate-50 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg> พิมพ์
+                        <button onclick="window.print()" class="bg-white text-slate-700 px-3 py-2 rounded text-sm font-medium border border-slate-300 shadow-sm hover:bg-slate-50 flex items-center gap-2 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg> พิมพ์ (Print)
                         </button>
-                        <button onclick="exportToImage()" class="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-primary-700 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> เซฟรูปลงเครื่อง (ส่ง LINE)
+                        <button onclick="exportToImage()" class="bg-primary-600 text-white px-3 py-2 rounded text-sm font-medium shadow-sm hover:bg-primary-700 flex items-center gap-2 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> บันทึกเป็นรูปภาพ
                         </button>
                     </div>
 
-                    <div id="invoiceArea" class="bg-white shadow-xl overflow-hidden lg:sticky lg:top-24 receipt-edge border border-slate-100 lg:border-none rounded-t-2xl lg:rounded-2xl invoice-wrap">
+                    <!-- Formal Invoice UI -->
+                    <div id="invoiceArea" class="invoice-wrap rounded-md lg:sticky lg:top-20">
                         
-                        <div class="hidden print-only text-center pt-8 pb-4">
-                            <h1 class="text-2xl font-bold text-slate-800">ใบแจ้งหนี้ / ใบเสร็จรับเงิน</h1>
-                            <p class="text-slate-500">ใบแจ้งหนี้ค่าเช่าห้องพัก</p>
-                        </div>
-
-                        <div class="bg-slate-800 px-6 py-5 text-white flex justify-between items-center no-print" id="invoiceHeaderBar">
-                            <div>
-                                <h3 class="text-lg font-bold tracking-widest uppercase">INVOICE</h3>
-                                <p class="text-slate-400 text-xs">บิลสรุปยอด</p>
-                            </div>
+                        <!-- Header -->
+                        <div class="text-center pt-8 pb-4 border-b border-slate-200 mx-6">
+                            <h1 class="text-xl font-bold text-slate-800 tracking-wide">ใบแจ้งหนี้ / INVOICE</h1>
+                            <p class="text-slate-500 text-sm mt-1">ใบแจ้งค่าเช่าห้องพักและบริการ</p>
                         </div>
                         
-                        <div class="p-6 pb-2" style="background-color: white;">
-                            <div class="flex justify-between items-end mb-6 pb-4 border-b-2 border-dashed border-slate-200">
+                        <div class="p-6 pb-8 bg-white">
+                            <!-- Meta info -->
+                            <div class="flex justify-between items-end mb-6 pb-4 border-b border-slate-200">
                                 <div>
-                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">ห้อง / Room</p>
-                                    <p class="text-3xl font-bold text-slate-800" id="outRoomNo">-</p>
+                                    <p class="text-xs text-slate-500 mb-1">ห้อง / ROOM</p>
+                                    <p class="text-2xl font-bold text-slate-800" id="outRoomNo">-</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">วันที่ / Date</p>
-                                    <p class="text-sm font-medium text-slate-700" id="outDate"></p>
+                                    <p class="text-xs text-slate-500 mb-1">วันที่ / DATE</p>
+                                    <p class="text-sm font-medium text-slate-800" id="outDate"></p>
                                 </div>
                             </div>
 
-                            <div class="space-y-4 mb-6 text-sm">
-                                <div class="flex justify-between items-end">
-                                    <div><p class="font-semibold text-slate-700">ค่าเช่าห้องพัก</p></div>
-                                    <p class="font-medium text-slate-800" id="outRent">0.00</p>
-                                </div>
-                                <div class="flex justify-between items-end">
-                                    <div>
-                                        <p class="font-semibold text-slate-700">ค่าไฟ</p>
-                                        <p class="text-xs text-slate-500">(<span id="oElecNew">0</span> - <span id="oElecOld">0</span>) = <span id="outElecUnits" class="font-medium text-slate-700">0</span> หน่วย x <span id="outElecRate">0</span> บ.</p>
-                                    </div>
-                                    <p class="font-medium text-slate-800" id="outElecTotal">0.00</p>
-                                </div>
-                                <div class="flex justify-between items-end">
-                                    <div>
-                                        <p class="font-semibold text-slate-700">ค่าน้ำประปา</p>
-                                        <p class="text-xs text-slate-500">(<span id="oWaterNew">0</span> - <span id="oWaterOld">0</span>) = <span id="outWaterUnits" class="font-medium text-slate-700">0</span> หน่วย x <span id="outWaterRate">0</span> บ.</p>
-                                    </div>
-                                    <p class="font-medium text-slate-800" id="outWaterTotal">0.00</p>
-                                </div>
-                                <div class="flex justify-between items-end" id="extraRow">
-                                    <div><p class="font-semibold text-slate-700" id="outExtraName">ค่าบริการ</p></div>
-                                    <p class="font-medium text-slate-800" id="outExtraFee">0.00</p>
-                                </div>
+                            <!-- Line items table -->
+                            <div class="mb-6">
+                                <table class="w-full text-sm text-left">
+                                    <thead>
+                                        <tr class="border-b-2 border-slate-800 text-slate-800">
+                                            <th class="py-2 font-semibold">รายการ (Description)</th>
+                                            <th class="py-2 font-semibold text-right">จำนวนเงิน (Amount)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-slate-700">
+                                        <!-- Rent -->
+                                        <tr class="border-b border-slate-200">
+                                            <td class="py-3">
+                                                <p class="font-medium">ค่าเช่าห้องพัก</p>
+                                            </td>
+                                            <td class="py-3 text-right font-medium" id="outRent">0.00</td>
+                                        </tr>
+                                        <!-- Electricity -->
+                                        <tr class="border-b border-slate-200">
+                                            <td class="py-3">
+                                                <p class="font-medium">ค่าไฟฟ้า</p>
+                                                <p class="text-xs text-slate-500 mt-1">เลขใหม่ <span id="oElecNew">0</span> - เลขเดิม <span id="oElecOld">0</span> = <span id="outElecUnits">0</span> หน่วย</p>
+                                                <p class="text-xs text-slate-500">(หน่วยละ <span id="outElecRate">0</span> บาท)</p>
+                                            </td>
+                                            <td class="py-3 text-right font-medium align-top" id="outElecTotal">0.00</td>
+                                        </tr>
+                                        <!-- Water -->
+                                        <tr class="border-b border-slate-200">
+                                            <td class="py-3">
+                                                <p class="font-medium">ค่าน้ำประปา</p>
+                                                <p class="text-xs text-slate-500 mt-1">เลขใหม่ <span id="oWaterNew">0</span> - เลขเดิม <span id="oWaterOld">0</span> = <span id="outWaterUnits">0</span> หน่วย</p>
+                                                <p class="text-xs text-slate-500">(หน่วยละ <span id="outWaterRate">0</span> บาท)</p>
+                                            </td>
+                                            <td class="py-3 text-right font-medium align-top" id="outWaterTotal">0.00</td>
+                                        </tr>
+                                        <!-- Extra -->
+                                        <tr class="border-b border-slate-200" id="extraRow">
+                                            <td class="py-3">
+                                                <p class="font-medium" id="outExtraName">ค่าบริการ</p>
+                                            </td>
+                                            <td class="py-3 text-right font-medium" id="outExtraFee">0.00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
 
-                            <div class="bg-primary-50 rounded-xl p-4 border border-primary-100 flex justify-between items-center mb-4">
-                                <p class="text-sm font-bold text-primary-800 uppercase tracking-wide">รวมทั้งสิ้น</p>
-                                <p class="text-2xl font-bold text-primary-600"><span id="outGrandTotal">0.00</span> <span class="text-lg">฿</span></p>
+                            <!-- Grand Total -->
+                            <div class="flex justify-between items-center py-4 px-4 bg-slate-50 border border-slate-300 rounded">
+                                <p class="text-base font-bold text-slate-800">ยอดรวมทั้งสิ้น / TOTAL</p>
+                                <p class="text-xl font-bold text-slate-800"><span id="outGrandTotal">0.00</span> ฿</p>
                             </div>
                             
-                            <!-- This signature block is hidden in the web view, but will show up in Print and Canvas Export -->
-                            <div id="signatureBlock" class="hidden mt-12 text-sm flex justify-between px-8 text-slate-600">
+                            <!-- Signature block -->
+                            <div id="signatureBlock" class="mt-16 text-sm flex justify-between text-slate-800">
                                 <div class="text-center">
-                                    <p>...........................................................</p>
-                                    <p class="mt-2">ผู้ชำระเงิน</p>
-                                    <p class="mt-1 text-xs">วันที่ .............../.............../...............</p>
+                                    <p>__________________________</p>
+                                    <p class="mt-2 font-medium">ผู้ชำระเงิน (Payer)</p>
+                                    <p class="mt-1 text-xs text-slate-500">วันที่ ______/______/______</p>
                                 </div>
                                 <div class="text-center">
-                                    <p>...........................................................</p>
-                                    <p class="mt-2">ผู้รับเงิน</p>
-                                    <p class="mt-1 text-xs">วันที่ .............../.............../...............</p>
+                                    <p>__________________________</p>
+                                    <p class="mt-2 font-medium">ผู้รับเงิน (Receiver)</p>
+                                    <p class="mt-1 text-xs text-slate-500">วันที่ ______/______/______</p>
                                 </div>
                             </div>
                         </div>
@@ -338,13 +348,13 @@
     </main>
 
     <!-- Mobile Floating Bottom Bar for Billing View -->
-    <div id="floatBar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-safe shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] lg:hidden z-50 flex justify-between items-center no-print hidden">
+    <div id="floatBar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-300 p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden z-50 flex justify-between items-center no-print hidden">
         <div>
             <p class="text-xs text-slate-500 font-medium">ยอดรวม (ห้อง <span id="floatRoom">-</span>)</p>
-            <p class="text-2xl font-bold text-primary-600 leading-none mt-1"><span id="floatTotal">0.00</span> <span class="text-lg">฿</span></p>
+            <p class="text-xl font-bold text-slate-800 leading-none mt-1"><span id="floatTotal">0.00</span> ฿</p>
         </div>
-        <button onclick="document.getElementById('invoiceArea').scrollIntoView()" class="bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md">
-            ดูบิลเต็ม
+        <button onclick="document.getElementById('invoiceArea').scrollIntoView()" class="bg-slate-800 text-white px-5 py-2.5 rounded font-medium text-sm shadow-sm">
+            ตรวจสอบบิล
         </button>
     </div>
 
@@ -376,9 +386,10 @@
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('outDate').textContent = new Date().toLocaleDateString('th-TH', options);
             
-            // Add CSS rule for signature block in print mode
+            // Setup signature block visibility for printing
             const style = document.createElement('style');
-            style.innerHTML = `@media print { #signatureBlock { display: flex !important; } }`;
+            // Signature block is visible in the HTML now for the formal look, but we can hide it in mobile view if space is tight. 
+            // Actually, in a formal document, keeping it visible is fine. 
             document.head.appendChild(style);
         };
 
@@ -404,7 +415,7 @@
             if (viewId === 'dashboard') renderDashboard();
             if (viewId === 'settings') renderSettings();
             if (viewId === 'room-form') {
-                document.getElementById('roomFormTitle').innerText = 'เพิ่มห้องใหม่';
+                document.getElementById('roomFormTitle').innerText = 'เพิ่มข้อมูลห้องพักใหม่';
                 document.getElementById('editRoomId').value = '';
                 document.getElementById('fRoomId').value = '';
                 document.getElementById('fRent').value = '';
@@ -423,24 +434,24 @@
 
             sortedRooms.forEach(room => {
                 const card = document.createElement('div');
-                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between";
+                card.className = "bg-white p-5 rounded-md shadow-sm border border-slate-300 hover:border-primary-400 transition-colors cursor-pointer flex flex-col justify-between";
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-xl font-bold text-slate-800">ห้อง ${room.id}</h3>
-                            <button onclick="editRoom(event, '${room.id}')" class="text-slate-400 hover:text-primary-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                            <h3 class="text-lg font-bold text-slate-800">ห้อง ${room.id}</h3>
+                            <button onclick="editRoom(event, '${room.id}')" class="text-slate-400 hover:text-primary-600" title="แก้ไขข้อมูล"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
                         </div>
-                        <p class="text-sm text-slate-500 mb-4">ค่าเช่า: ${formatN(room.rent)} ฿</p>
+                        <p class="text-sm text-slate-600 mb-4">อัตราค่าเช่า: <span class="font-medium">${formatN(room.rent)} บาท</span></p>
                     </div>
-                    <button onclick="openBilling('${room.id}')" class="w-full bg-primary-50 text-primary-700 font-semibold py-2.5 rounded-xl hover:bg-primary-100 mt-2 transition-colors">
-                        ออกบิลเดือนนี้
+                    <button onclick="openBilling('${room.id}')" class="w-full bg-slate-100 border border-slate-300 text-slate-700 font-medium py-2 rounded hover:bg-slate-200 transition-colors text-sm">
+                        ออกใบแจ้งหนี้
                     </button>
                 `;
                 list.appendChild(card);
             });
 
             if(state.rooms.length === 0) {
-                list.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">ยังไม่มีข้อมูลห้องพัก กรุณากด "+ เพิ่มห้อง" ด้านบน</div>`;
+                list.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 border border-dashed border-slate-300 rounded-md bg-white">ยังไม่มีข้อมูลห้องพัก กรุณากด "+ เพิ่มห้องพัก" ด้านบน</div>`;
             }
         }
 
@@ -468,18 +479,18 @@
             const elec = parseFloat(document.getElementById('fElecMeter').value) || 0;
             const water = parseFloat(document.getElementById('fWaterMeter').value) || 0;
 
-            if(!id) return alert('กรุณากรอกหมายเลขห้อง');
+            if(!id) return alert('กรุณาระบุหมายเลขห้อง');
 
             const newRoom = { id, rent, elecMeter: elec, waterMeter: water };
 
             if (oldId) {
                 const idx = state.rooms.findIndex(r => r.id === oldId);
                 if(idx !== -1) {
-                    if(id !== oldId && state.rooms.find(r => r.id === id)) return alert('หมายเลขห้องนี้มีอยู่แล้ว');
+                    if(id !== oldId && state.rooms.find(r => r.id === id)) return alert('หมายเลขห้องนี้ถูกใช้งานแล้ว');
                     state.rooms[idx] = newRoom;
                 }
             } else {
-                if(state.rooms.find(r => r.id === id)) return alert('หมายเลขห้องนี้มีอยู่แล้ว');
+                if(state.rooms.find(r => r.id === id)) return alert('หมายเลขห้องนี้ถูกใช้งานแล้ว');
                 state.rooms.push(newRoom);
             }
             saveState();
@@ -490,7 +501,7 @@
             e.stopPropagation();
             const room = state.rooms.find(r => r.id === roomId);
             if(room) {
-                document.getElementById('roomFormTitle').innerText = `แก้ไขห้อง ${room.id}`;
+                document.getElementById('roomFormTitle').innerText = `แก้ไขข้อมูลห้อง ${room.id}`;
                 document.getElementById('editRoomId').value = room.id;
                 document.getElementById('fRoomId').value = room.id;
                 document.getElementById('fRent').value = room.rent;
@@ -502,7 +513,7 @@
 
         function deleteRoom() {
             const roomId = document.getElementById('bRoomId').value;
-            if(confirm(`ยืนยันการลบห้อง ${roomId}?`)) {
+            if(confirm(`ยืนยันการลบข้อมูลห้อง ${roomId} ออกจากระบบ?`)) {
                 state.rooms = state.rooms.filter(r => r.id !== roomId);
                 saveState();
                 nav('dashboard');
@@ -581,7 +592,7 @@
             document.getElementById('outWaterTotal').textContent = formatN(waterTotal);
             
             if(extraFee > 0 || extraName !== '') {
-                document.getElementById('extraRow').style.display = 'flex';
+                document.getElementById('extraRow').style.display = 'table-row';
                 document.getElementById('outExtraName').textContent = extraName || 'ค่าบริการอื่นๆ';
                 document.getElementById('outExtraFee').textContent = formatN(extraFee);
             } else {
@@ -601,7 +612,7 @@
             const waterNew = document.getElementById('bWaterNew').value;
 
             if(elecNew === '' || waterNew === '') {
-                if(!confirm('คุณยังไม่ได้กรอกมิเตอร์ใหม่ ต้องการบันทึกเลยหรือไม่? (มิเตอร์เก่าจะไม่ถูกอัปเดต)')) return;
+                if(!confirm('คำเตือน: คุณยังไม่ได้ระบุเลขมิเตอร์ใหม่ ต้องการบันทึกข้อมูลหรือไม่? (ข้อมูลมิเตอร์เดิมจะไม่ถูกอัปเดต)')) return;
             }
 
             // Update room meters
@@ -617,49 +628,21 @@
 
             saveState();
             
-            alert(`บันทึกบิลห้อง ${roomId} สำเร็จ! ข้อมูลมิเตอร์ถูกอัปเดตแล้ว`);
+            alert(`บันทึกข้อมูลใบแจ้งหนี้ห้อง ${roomId} เรียบร้อยแล้ว`);
             nav('dashboard');
         }
 
         // --- HTML2CANVAS IMAGE EXPORT ---
         function exportToImage() {
             const invoiceArea = document.getElementById('invoiceArea');
-            const sigBlock = document.getElementById('signatureBlock');
-            const headerBar = document.getElementById('invoiceHeaderBar');
             
-            // Temporary adjustments for a perfect image export
-            sigBlock.style.display = 'flex';
-            headerBar.style.display = 'none';
-            invoiceArea.style.border = 'none';
-            invoiceArea.style.borderRadius = '0';
-            invoiceArea.style.boxShadow = 'none';
-            
-            // Add title for the image
-            const titleDiv = document.createElement('div');
-            titleDiv.innerHTML = `
-                <div class="text-center pt-8 pb-4" style="background: white;">
-                    <h1 class="text-2xl font-bold text-slate-800">ใบแจ้งหนี้ / ใบเสร็จรับเงิน</h1>
-                    <p class="text-slate-500">ใบแจ้งหนี้ค่าเช่าห้องพัก</p>
-                </div>
-            `;
-            invoiceArea.insertBefore(titleDiv, invoiceArea.firstChild);
-
             html2canvas(invoiceArea, { 
-                scale: 2,
+                scale: 2, // High resolution
                 backgroundColor: "#ffffff",
                 useCORS: true
             }).then(canvas => {
-                // Revert adjustments
-                sigBlock.style.display = 'none';
-                headerBar.style.display = 'flex';
-                invoiceArea.style.border = '';
-                invoiceArea.style.borderRadius = '';
-                invoiceArea.style.boxShadow = '';
-                invoiceArea.removeChild(titleDiv);
-
-                // Download
                 const link = document.createElement('a');
-                link.download = `Bill_Room_${document.getElementById('outRoomNo').textContent}.png`;
+                link.download = `Invoice_Room_${document.getElementById('outRoomNo').textContent}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
