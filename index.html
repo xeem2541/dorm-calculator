@@ -16,7 +16,6 @@
                 extend: {
                     fontFamily: { sans: ['Sarabun', 'sans-serif'] },
                     colors: {
-                        // Corporate Navy Blue for a formal look
                         primary: { 50: '#f8fafc', 100: '#f1f5f9', 500: '#475569', 600: '#334155', 700: '#1e293b' }
                     }
                 }
@@ -37,7 +36,6 @@
         .view { display: none; }
         .view.active { display: block; }
 
-        /* Formal Invoice Container */
         .invoice-wrap {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
@@ -94,24 +92,26 @@
             </div>
             
             <div class="bg-white rounded-md p-6 shadow-sm border border-slate-300 space-y-4">
-                <p class="text-sm text-slate-500 mb-4">ค่าเหล่านี้จะถูกใช้เป็นค่าเริ่มต้นเมื่อทำบิลให้ทุกห้อง</p>
+                <p class="text-sm text-slate-500 mb-4">ข้อมูลเหล่านี้จะถูกนำไปแสดงและใช้คำนวณในหน้าใบแจ้งหนี้</p>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">ค่าไฟ (บาท/หน่วย)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อหอพัก (แสดงบนหัวบิล)</label>
+                    <input type="text" id="gDormName" placeholder="เช่น หอพักดาวนิล" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ที่อยู่ / ข้อมูลติดต่อ (แสดงบนหัวบิล)</label>
+                    <textarea id="gDormAddress" rows="2" placeholder="ที่อยู่ หรือเบอร์โทรศัพท์สำหรับติดต่อ" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all"></textarea>
+                </div>
+                <hr class="border-slate-200 my-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ค่าไฟเริ่มต้น (บาท/หน่วย)</label>
                     <input type="number" id="gElecRate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">ค่าน้ำ (บาท/หน่วย)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ค่าน้ำเริ่มต้น (บาท/หน่วย)</label>
                     <input type="number" id="gWaterRate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อค่าบริการอื่นๆ (ค่าเริ่มต้น)</label>
-                    <input type="text" id="gExtraName" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงินค่าบริการอื่นๆ (บาท)</label>
-                    <input type="number" id="gExtraFee" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all">
-                </div>
-                <div class="pt-2">
+                
+                <div class="pt-4">
                     <button onclick="saveSettings()" class="w-full bg-primary-600 text-white px-4 py-2.5 rounded font-medium hover:bg-primary-700 shadow-sm transition-colors">บันทึกการตั้งค่า</button>
                 </div>
             </div>
@@ -170,7 +170,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ค่าเช่าห้องพัก (บาท)</label>
-                                <input type="number" id="bRent" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded focus:bg-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
+                                <input type="number" id="bRent" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
                             </div>
                         </div>
                     </section>
@@ -187,11 +187,11 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">เลขมิเตอร์เดิม</label>
-                                <input type="number" id="bElecOld" class="w-full px-3 py-2 bg-slate-100 text-slate-500 border border-slate-200 rounded outline-none" oninput="calcBill()">
+                                <input type="number" id="bElecOld" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-primary-700 mb-1 uppercase tracking-wide">เลขมิเตอร์ใหม่</label>
-                                <input type="number" id="bElecNew" class="w-full px-3 py-2 bg-white border border-primary-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none text-slate-800 font-semibold transition-all" oninput="calcBill()">
+                                <input type="number" id="bElecNew" class="w-full px-3 py-2 bg-white border border-primary-400 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none text-slate-800 font-semibold transition-all shadow-sm" oninput="calcBill()">
                             </div>
                         </div>
                     </section>
@@ -208,26 +208,24 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">เลขมิเตอร์เดิม</label>
-                                <input type="number" id="bWaterOld" class="w-full px-3 py-2 bg-slate-100 text-slate-500 border border-slate-200 rounded outline-none" oninput="calcBill()">
+                                <input type="number" id="bWaterOld" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-primary-700 mb-1 uppercase tracking-wide">เลขมิเตอร์ใหม่</label>
-                                <input type="number" id="bWaterNew" class="w-full px-3 py-2 bg-white border border-primary-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none text-slate-800 font-semibold transition-all" oninput="calcBill()">
+                                <input type="number" id="bWaterNew" class="w-full px-3 py-2 bg-white border border-primary-400 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none text-slate-800 font-semibold transition-all shadow-sm" oninput="calcBill()">
                             </div>
                         </div>
                     </section>
 
                     <section class="bg-white rounded-md p-5 border border-slate-300 shadow-sm">
-                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">ค่าใช้จ่ายอื่นๆ</h2>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1">รายการ</label>
-                                <input type="text" id="bExtraName" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-500 mb-1">จำนวนเงิน (บาท)</label>
-                                <input type="number" id="bExtraFee" class="w-full px-3 py-2 bg-white border border-slate-300 rounded focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all" oninput="calcBill()">
-                            </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">ค่าใช้จ่ายอื่นๆ (เพิ่มได้ไม่จำกัด)</h2>
+                            <button onclick="addExtraItem()" class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-200 transition-colors font-medium">
+                                + เพิ่มรายการใหม่
+                            </button>
+                        </div>
+                        <div id="extraItemsList" class="space-y-3">
+                            <!-- Dynamic Extra Items Rendered Here -->
                         </div>
                     </section>
 
@@ -257,6 +255,10 @@
                         
                         <!-- Header -->
                         <div class="text-center pt-8 pb-4 border-b border-slate-200 mx-6">
+                            <!-- Dynamic Dorm Name -->
+                            <h2 class="text-lg font-bold text-slate-800 mb-1" id="outDormName" style="display:none;"></h2>
+                            <p class="text-sm text-slate-500 mb-3 whitespace-pre-line" id="outDormAddress" style="display:none;"></p>
+                            
                             <h1 class="text-xl font-bold text-slate-800 tracking-wide">ใบแจ้งหนี้ / INVOICE</h1>
                             <p class="text-slate-500 text-sm mt-1">ใบแจ้งค่าเช่าห้องพักและบริการ</p>
                         </div>
@@ -309,13 +311,10 @@
                                             </td>
                                             <td class="py-3 text-right font-medium align-top" id="outWaterTotal">0.00</td>
                                         </tr>
-                                        <!-- Extra -->
-                                        <tr class="border-b border-slate-200" id="extraRow">
-                                            <td class="py-3">
-                                                <p class="font-medium" id="outExtraName">ค่าบริการ</p>
-                                            </td>
-                                            <td class="py-3 text-right font-medium" id="outExtraFee">0.00</td>
-                                        </tr>
+                                        <!-- Dynamic Extra Items -->
+                                    </tbody>
+                                    <tbody class="text-slate-700" id="invoiceExtraRows">
+                                        <!-- Rendered via JS -->
                                     </tbody>
                                 </table>
                             </div>
@@ -362,10 +361,18 @@
     <script>
         // Default State
         let state = {
-            settings: { elecRate: 9, waterRate: 10, extraName: 'ค่าขยะ', extraFee: 50 },
-            rooms: [], // array of objects
-            history: [] // ready for future
+            settings: { 
+                dormName: '', 
+                dormAddress: '', 
+                elecRate: 9, 
+                waterRate: 10 
+            },
+            rooms: [], 
+            history: [] 
         };
+
+        // Temporary state for the current billing extra items
+        let currentExtras = [];
 
         // Initialize App
         window.onload = () => {
@@ -385,19 +392,16 @@
             // Set today's date in bill
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('outDate').textContent = new Date().toLocaleDateString('th-TH', options);
-            
-            // Setup signature block visibility for printing
-            const style = document.createElement('style');
-            // Signature block is visible in the HTML now for the formal look, but we can hide it in mobile view if space is tight. 
-            // Actually, in a formal document, keeping it visible is fine. 
-            document.head.appendChild(style);
         };
 
         // State Management
         function loadState() {
             const saved = localStorage.getItem('dormManagerState');
             if (saved) {
-                state = JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed }; // Merge to ensure new keys exist
+                if(!state.settings.dormName) state.settings.dormName = '';
+                if(!state.settings.dormAddress) state.settings.dormAddress = '';
             }
         }
         function saveState() {
@@ -429,7 +433,6 @@
             const list = document.getElementById('roomList');
             list.innerHTML = '';
             
-            // Sort by room id naturally
             const sortedRooms = [...state.rooms].sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true}));
 
             sortedRooms.forEach(room => {
@@ -457,16 +460,16 @@
 
         // --- SETTINGS ---
         function renderSettings() {
+            document.getElementById('gDormName').value = state.settings.dormName || '';
+            document.getElementById('gDormAddress').value = state.settings.dormAddress || '';
             document.getElementById('gElecRate').value = state.settings.elecRate;
             document.getElementById('gWaterRate').value = state.settings.waterRate;
-            document.getElementById('gExtraName').value = state.settings.extraName;
-            document.getElementById('gExtraFee').value = state.settings.extraFee;
         }
         function saveSettings() {
+            state.settings.dormName = document.getElementById('gDormName').value.trim();
+            state.settings.dormAddress = document.getElementById('gDormAddress').value.trim();
             state.settings.elecRate = parseFloat(document.getElementById('gElecRate').value) || 0;
             state.settings.waterRate = parseFloat(document.getElementById('gWaterRate').value) || 0;
-            state.settings.extraName = document.getElementById('gExtraName').value || '';
-            state.settings.extraFee = parseFloat(document.getElementById('gExtraFee').value) || 0;
             saveState();
             nav('dashboard');
         }
@@ -520,7 +523,7 @@
             }
         }
 
-        // --- BILLING ---
+        // --- BILLING (DYNAMIC EXTRAS) ---
         function openBilling(roomId) {
             const room = state.rooms.find(r => r.id === roomId);
             if(!room) return;
@@ -533,21 +536,89 @@
             
             // Pre-fill inputs from state
             document.getElementById('bRent').value = room.rent;
-            
             document.getElementById('bElecRate').value = state.settings.elecRate;
             document.getElementById('bWaterRate').value = state.settings.waterRate;
-            
             document.getElementById('bElecOld').value = room.elecMeter;
             document.getElementById('bWaterOld').value = room.waterMeter;
-            
-            document.getElementById('bExtraName').value = state.settings.extraName;
-            document.getElementById('bExtraFee').value = state.settings.extraFee;
             
             // Clear new meters for the new month
             document.getElementById('bElecNew').value = '';
             document.getElementById('bWaterNew').value = '';
 
+            // Apply Dorm Name / Address to Invoice
+            const dName = document.getElementById('outDormName');
+            const dAddr = document.getElementById('outDormAddress');
+            
+            if (state.settings.dormName) {
+                dName.textContent = state.settings.dormName;
+                dName.style.display = 'block';
+            } else {
+                dName.style.display = 'none';
+            }
+
+            if (state.settings.dormAddress) {
+                dAddr.textContent = state.settings.dormAddress;
+                dAddr.style.display = 'block';
+            } else {
+                dAddr.style.display = 'none';
+            }
+
+            // Reset dynamic extras
+            currentExtras = [];
+            // Optional: You could populate currentExtras with defaults here if you wanted.
+            
+            renderExtraInputs();
             calcBill();
+        }
+
+        function addExtraItem() {
+            currentExtras.push({ name: '', fee: 0 });
+            renderExtraInputs();
+            calcBill();
+        }
+
+        function removeExtraItem(index) {
+            currentExtras.splice(index, 1);
+            renderExtraInputs();
+            calcBill();
+        }
+
+        function updateExtraItem(index, field, value) {
+            if(field === 'fee') {
+                currentExtras[index][field] = parseFloat(value) || 0;
+            } else {
+                currentExtras[index][field] = value;
+            }
+            calcBill();
+        }
+
+        function renderExtraInputs() {
+            const list = document.getElementById('extraItemsList');
+            list.innerHTML = '';
+            
+            if (currentExtras.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 italic">ไม่มีรายการเพิ่มเติม</p>`;
+                return;
+            }
+
+            currentExtras.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex gap-2 items-end";
+                row.innerHTML = `
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-medium text-slate-500 mb-1">ชื่อรายการ</label>
+                        <input type="text" placeholder="เช่น ค่าเน็ต" value="${item.name}" oninput="updateExtraItem(${idx}, 'name', this.value)" class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded focus:border-primary-500 outline-none transition-all text-sm">
+                    </div>
+                    <div class="w-24">
+                        <label class="block text-[10px] font-medium text-slate-500 mb-1">ราคา (บาท)</label>
+                        <input type="number" placeholder="0" value="${item.fee || ''}" oninput="updateExtraItem(${idx}, 'fee', this.value)" class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded focus:border-primary-500 outline-none transition-all text-sm text-right">
+                    </div>
+                    <button onclick="removeExtraItem(${idx})" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded border border-transparent transition-colors mb-px" title="ลบรายการ">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                `;
+                list.appendChild(row);
+            });
         }
 
         function calcBill() {
@@ -564,15 +635,16 @@
             const waterNewVal = document.getElementById('bWaterNew').value;
             const waterNew = parseFloat(waterNewVal) || 0;
             
-            const extraName = document.getElementById('bExtraName').value || '';
-            const extraFee = parseFloat(document.getElementById('bExtraFee').value) || 0;
-
             let elecUnits = elecNewVal === '' ? 0 : Math.max(0, elecNew - elecOld);
             let waterUnits = waterNewVal === '' ? 0 : Math.max(0, waterNew - waterOld);
             
             const elecTotal = elecUnits * elecRate;
             const waterTotal = waterUnits * waterRate;
-            const grandTotal = roomRent + elecTotal + waterTotal + extraFee;
+            
+            // Calc Extras Total
+            const extrasTotal = currentExtras.reduce((sum, item) => sum + (item.fee || 0), 0);
+
+            const grandTotal = roomRent + elecTotal + waterTotal + extrasTotal;
 
             // Update Invoice UI
             document.getElementById('outRoomNo').textContent = roomNo;
@@ -591,13 +663,22 @@
             document.getElementById('outWaterRate').textContent = waterRate;
             document.getElementById('outWaterTotal').textContent = formatN(waterTotal);
             
-            if(extraFee > 0 || extraName !== '') {
-                document.getElementById('extraRow').style.display = 'table-row';
-                document.getElementById('outExtraName').textContent = extraName || 'ค่าบริการอื่นๆ';
-                document.getElementById('outExtraFee').textContent = formatN(extraFee);
-            } else {
-                document.getElementById('extraRow').style.display = 'none';
-            }
+            // Render Dynamic Invoice Extra Rows
+            const invoiceExtraTbody = document.getElementById('invoiceExtraRows');
+            invoiceExtraTbody.innerHTML = '';
+            
+            currentExtras.forEach(item => {
+                if(!item.name && !item.fee) return; // Skip empty rows visually on the bill
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-200";
+                tr.innerHTML = `
+                    <td class="py-3">
+                        <p class="font-medium">${item.name || 'ค่าบริการเพิ่มเติม'}</p>
+                    </td>
+                    <td class="py-3 text-right font-medium">${formatN(item.fee || 0)}</td>
+                `;
+                invoiceExtraTbody.appendChild(tr);
+            });
 
             document.getElementById('outGrandTotal').textContent = formatN(grandTotal);
             document.getElementById('floatTotal').textContent = formatN(grandTotal);
@@ -610,16 +691,36 @@
 
             const elecNew = document.getElementById('bElecNew').value;
             const waterNew = document.getElementById('bWaterNew').value;
+            
+            // In case they manually modified the Old Meter values directly in the billing view
+            const elecOldInput = document.getElementById('bElecOld').value;
+            const waterOldInput = document.getElementById('bWaterOld').value;
 
             if(elecNew === '' || waterNew === '') {
-                if(!confirm('คำเตือน: คุณยังไม่ได้ระบุเลขมิเตอร์ใหม่ ต้องการบันทึกข้อมูลหรือไม่? (ข้อมูลมิเตอร์เดิมจะไม่ถูกอัปเดต)')) return;
+                if(!confirm('คำเตือน: คุณยังไม่ได้ระบุเลขมิเตอร์ใหม่ ต้องการบันทึกข้อมูลหรือไม่? (ข้อมูลมิเตอร์เดิมในรอบหน้าอาจไม่ถูกต้อง)')) return;
             }
 
-            // Update room meters
-            if(elecNew !== '') room.elecMeter = parseFloat(elecNew);
-            if(waterNew !== '') room.waterMeter = parseFloat(waterNew);
+            // Update room meters based on logic:
+            // If they provided a new meter, that becomes the future old meter.
+            // If they didn't, but they explicitly changed the old meter box, we should save that instead.
+            if(elecNew !== '') {
+                room.elecMeter = parseFloat(elecNew);
+            } else if (elecOldInput !== '') {
+                room.elecMeter = parseFloat(elecOldInput);
+            }
 
-            // Record to history (Basic implementation for future)
+            if(waterNew !== '') {
+                room.waterMeter = parseFloat(waterNew);
+            } else if (waterOldInput !== '') {
+                room.waterMeter = parseFloat(waterOldInput);
+            }
+
+            // Update rent if they modified it manually for this room on the fly (so next month they don't have to edit again)
+            const rentInput = document.getElementById('bRent').value;
+            if(rentInput !== '') {
+                room.rent = parseFloat(rentInput);
+            }
+
             state.history.push({
                 date: new Date().toISOString(),
                 roomId: room.id,
@@ -637,7 +738,7 @@
             const invoiceArea = document.getElementById('invoiceArea');
             
             html2canvas(invoiceArea, { 
-                scale: 2, // High resolution
+                scale: 2, 
                 backgroundColor: "#ffffff",
                 useCORS: true
             }).then(canvas => {
